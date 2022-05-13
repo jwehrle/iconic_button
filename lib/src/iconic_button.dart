@@ -2,27 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-typedef Reset = void Function({
-  IconData? iconData,
-  String? label,
-  ButtonStyle? style,
-});
-typedef Update = void Function({
-  Set<MaterialState> add,
-  Set<MaterialState> remove,
-});
-
-class IconicController {
-  Reset? reset;
-  Update? update;
-  VoidCallback? select;
-  VoidCallback? unSelect;
-  VoidCallback? disable;
-  VoidCallback? enable;
-  bool Function()? isSelected;
-  bool Function()? isDisabled;
-}
-
 const double _defaultElevation = 0.0;
 const Size _defaultSize = Size(45.0, 40);
 const Color _defaultShadow = Colors.black;
@@ -203,10 +182,7 @@ class IconicButton extends StatefulWidget {
     this.waitDuration = const Duration(seconds: 2),
     this.changeDuration,
     this.curve,
-    this.controller,
   }) : super(key: key);
-
-  final IconicController? controller;
 
   /// An icon is always shown. Will be scaled to fit in tile
   final IconData iconData;
@@ -345,16 +321,6 @@ class IconicButtonState extends State<IconicButton> {
     _style = widget.style;
     _iconData = widget.iconData;
     _label = widget.label;
-    if (widget.controller != null) {
-      widget.controller!.reset = reset;
-      widget.controller!.update = update;
-      widget.controller!.select = select;
-      widget.controller!.unSelect = unSelect;
-      widget.controller!.disable = disable;
-      widget.controller!.enable = enable;
-      widget.controller!.isSelected = isSelected;
-      widget.controller!.isDisabled = isDisabled;
-    }
   }
 
   @override
@@ -397,21 +363,6 @@ class IconicButtonState extends State<IconicButton> {
       );
     }
     return button;
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    if (widget.controller != null) {
-      widget.controller!.reset = null;
-      widget.controller!.update = null;
-      widget.controller!.select = null;
-      widget.controller!.unSelect = null;
-      widget.controller!.disable = null;
-      widget.controller!.enable = null;
-      widget.controller!.isSelected = null;
-      widget.controller!.isDisabled = null;
-    }
   }
 }
 
