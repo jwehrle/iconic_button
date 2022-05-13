@@ -1,7 +1,27 @@
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+typedef Reset = void Function({
+  IconData? iconData,
+  String? label,
+  ButtonStyle? style,
+});
+typedef Update = void Function({
+  Set<MaterialState> add,
+  Set<MaterialState> remove,
+});
+
+class IconicCallForward {
+  Reset? reset;
+  Update? update;
+  VoidCallback? select;
+  VoidCallback? unSelect;
+  VoidCallback? disable;
+  VoidCallback? enable;
+  bool Function()? isSelected;
+  bool Function()? isDisabled;
+}
 
 const double _defaultElevation = 0.0;
 const Size _defaultSize = Size(45.0, 40);
@@ -183,7 +203,10 @@ class IconicButton extends StatefulWidget {
     this.waitDuration = const Duration(seconds: 2),
     this.changeDuration,
     this.curve,
+    this.callForward,
   }) : super(key: key);
+
+  final IconicCallForward? callForward;
 
   /// An icon is always shown. Will be scaled to fit in tile
   final IconData iconData;
@@ -252,18 +275,18 @@ class IconicButtonState extends State<IconicButton> {
 
   void enable() => update(remove: {MaterialState.disabled});
 
-  bool get isSelected => _states.contains(MaterialState.selected);
+  bool isSelected() => _states.contains(MaterialState.selected);
 
-  bool get isDisabled => _states.contains(MaterialState.disabled);
+  bool isDisabled() => _states.contains(MaterialState.disabled);
 
-  VoidCallback? get _onTap => isDisabled
+  VoidCallback? get _onTap => isDisabled()
       ? null
       : () {
           widget.onPressed();
           update(remove: {MaterialState.pressed});
         };
 
-  ValueChanged<TapDownDetails>? get _onTapDown => isDisabled
+  ValueChanged<TapDownDetails>? get _onTapDown => isDisabled()
       ? null
       : (details) {
           update(add: {MaterialState.pressed});
@@ -272,7 +295,7 @@ class IconicButtonState extends State<IconicButton> {
   VoidCallback? get _onTapCancel =>
       () => update(remove: {MaterialState.pressed});
 
-  ValueChanged<bool>? get _onHover => isDisabled
+  ValueChanged<bool>? get _onHover => isDisabled()
       ? null
       : (isHovering) {
           if (isHovering) {
@@ -282,7 +305,7 @@ class IconicButtonState extends State<IconicButton> {
           }
         };
 
-  ValueChanged<bool>? get _onFocusChange => isDisabled
+  ValueChanged<bool>? get _onFocusChange => isDisabled()
       ? null
       : (isFocused) {
           if (isFocused) {
@@ -322,6 +345,16 @@ class IconicButtonState extends State<IconicButton> {
     _style = widget.style;
     _iconData = widget.iconData;
     _label = widget.label;
+    if (widget.callForward != null) {
+      widget.callForward!.reset = reset;
+      widget.callForward!.update = update;
+      widget.callForward!.select = select;
+      widget.callForward!.unSelect = unSelect;
+      widget.callForward!.disable = disable;
+      widget.callForward!.enable = enable;
+      widget.callForward!.isSelected = isSelected;
+      widget.callForward!.isDisabled = isDisabled;
+    }
   }
 
   @override
@@ -364,6 +397,21 @@ class IconicButtonState extends State<IconicButton> {
       );
     }
     return button;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    if (widget.callForward != null) {
+      widget.callForward!.reset = null;
+      widget.callForward!.update = null;
+      widget.callForward!.select = null;
+      widget.callForward!.unSelect = null;
+      widget.callForward!.disable = null;
+      widget.callForward!.enable = null;
+      widget.callForward!.isSelected = null;
+      widget.callForward!.isDisabled = null;
+    }
   }
 }
 
