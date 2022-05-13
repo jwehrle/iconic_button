@@ -12,7 +12,7 @@ typedef Update = void Function({
   Set<MaterialState> remove,
 });
 
-class IconicCallForward {
+class IconicController {
   Reset? reset;
   Update? update;
   VoidCallback? select;
@@ -203,10 +203,10 @@ class IconicButton extends StatefulWidget {
     this.waitDuration = const Duration(seconds: 2),
     this.changeDuration,
     this.curve,
-    this.callForward,
+    this.controller,
   }) : super(key: key);
 
-  final IconicCallForward? callForward;
+  final IconicController? controller;
 
   /// An icon is always shown. Will be scaled to fit in tile
   final IconData iconData;
@@ -345,15 +345,15 @@ class IconicButtonState extends State<IconicButton> {
     _style = widget.style;
     _iconData = widget.iconData;
     _label = widget.label;
-    if (widget.callForward != null) {
-      widget.callForward!.reset = reset;
-      widget.callForward!.update = update;
-      widget.callForward!.select = select;
-      widget.callForward!.unSelect = unSelect;
-      widget.callForward!.disable = disable;
-      widget.callForward!.enable = enable;
-      widget.callForward!.isSelected = isSelected;
-      widget.callForward!.isDisabled = isDisabled;
+    if (widget.controller != null) {
+      widget.controller!.reset = reset;
+      widget.controller!.update = update;
+      widget.controller!.select = select;
+      widget.controller!.unSelect = unSelect;
+      widget.controller!.disable = disable;
+      widget.controller!.enable = enable;
+      widget.controller!.isSelected = isSelected;
+      widget.controller!.isDisabled = isDisabled;
     }
   }
 
@@ -402,15 +402,15 @@ class IconicButtonState extends State<IconicButton> {
   @override
   void dispose() {
     super.dispose();
-    if (widget.callForward != null) {
-      widget.callForward!.reset = null;
-      widget.callForward!.update = null;
-      widget.callForward!.select = null;
-      widget.callForward!.unSelect = null;
-      widget.callForward!.disable = null;
-      widget.callForward!.enable = null;
-      widget.callForward!.isSelected = null;
-      widget.callForward!.isDisabled = null;
+    if (widget.controller != null) {
+      widget.controller!.reset = null;
+      widget.controller!.update = null;
+      widget.controller!.select = null;
+      widget.controller!.unSelect = null;
+      widget.controller!.disable = null;
+      widget.controller!.enable = null;
+      widget.controller!.isSelected = null;
+      widget.controller!.isDisabled = null;
     }
   }
 }
