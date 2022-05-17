@@ -13,10 +13,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-  collection_value_notifier:
-    git:
-      url: https://github.com/jwehrle/collection_value_notifier.git
-
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -43,15 +43,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.15.0"
-  collection_value_notifier:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: e127bdbc911eddddee29f49cac4a2122aa3b1f13
-      url: "https://github.com/jwehrle/collection_value_notifier.git"
-    source: git
-    version: "0.0.1"
   fake_async:
     dependency: transitive
     description:

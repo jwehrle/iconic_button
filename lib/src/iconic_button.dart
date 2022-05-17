@@ -1,43 +1,6 @@
 import 'dart:math';
 
-import 'package:collection_value_notifier/collection_notifier.dart';
-import 'package:collection_value_notifier/set_listenable_builder.dart';
 import 'package:flutter/material.dart';
-
-class IconicController extends SetNotifier<MaterialState> {
-  IconicController() : super({});
-
-  Set<MaterialState> get states => value;
-
-  void update({
-    Set<MaterialState> add = const {},
-    Set<MaterialState> remove = const {},
-  }) {
-    if (add.isEmpty && remove.isEmpty) {
-      return;
-    }
-    Set<MaterialState> update = Set.from(value);
-    update.addAll(add);
-    update.removeAll(remove);
-    value = update;
-  }
-
-  bool get isDragged => value.contains(MaterialState.dragged);
-
-  bool get isDisabled => value.contains(MaterialState.disabled);
-
-  bool get isError => value.contains(MaterialState.error);
-
-  bool get isFocused => value.contains(MaterialState.focused);
-
-  bool get isHovered => value.contains(MaterialState.hovered);
-
-  bool get isPressed => value.contains(MaterialState.pressed);
-
-  bool get isScrollUnder => value.contains(MaterialState.scrolledUnder);
-
-  bool get isSelected => value.contains(MaterialState.selected);
-}
 
 const double _defaultElevation = 0.0;
 const Size _defaultSize = Size(45.0, 40);
@@ -59,11 +22,11 @@ const InteractiveInkFeatureFactory _defaultSplash = InkRipple.splashFactory;
 /// together or left null.
 ///
 ButtonStyle buttonStyleFrom({
-  Color? primary,
-  Color? onPrimary,
-  Color? onSurface,
+  required Color primary,
+  required Color onPrimary,
+  required Color onSurface,
   Color? shadowColor,
-  double? elevation,
+  double elevation = 0.0,
   TextStyle? textStyle,
   EdgeInsetsGeometry? padding,
   Size? fixedSize,
@@ -71,24 +34,11 @@ ButtonStyle buttonStyleFrom({
   Duration? animationDuration,
   InteractiveInkFeatureFactory? splashFactory,
 }) {
-  final MaterialStateProperty<Color?>? foregroundColor =
-      (onSurface == null && primary == null)
-          ? null
-          : _ForegroundMaterialStateProperty(onPrimary, onSurface, primary);
-  final MaterialStateProperty<Color?>? background =
-      (primary == null && onPrimary == null)
-          ? null
-          : _BackgroundMaterialStateProperty(primary, onPrimary);
-  final MaterialStateProperty<Color?>? overlayColor =
-      (primary == null) ? null : _OverlayMaterialStateProperty(primary);
-  final MaterialStateProperty<double?>? elevationProperty =
-      elevation == null ? null : _ElevationMaterialStateProperty(elevation);
-
   return ButtonStyle(
-    backgroundColor: background,
-    foregroundColor: foregroundColor,
-    overlayColor: overlayColor,
-    elevation: elevationProperty,
+    backgroundColor: _BackgroundProperty(primary, onPrimary),
+    foregroundColor: _ForegroundProperty(onPrimary, onSurface, primary),
+    overlayColor: _OverlayProperty(primary),
+    elevation: _ElevationProperty(elevation),
     animationDuration: animationDuration,
     splashFactory: splashFactory,
     shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
@@ -100,8 +50,8 @@ ButtonStyle buttonStyleFrom({
 }
 
 @immutable
-class _ForegroundMaterialStateProperty extends MaterialStateProperty<Color?> {
-  _ForegroundMaterialStateProperty(
+class _ForegroundProperty extends MaterialStateProperty<Color?> {
+  _ForegroundProperty(
     this.primary,
     this.onSurface,
     this.backgroundColor,
@@ -129,8 +79,8 @@ class _ForegroundMaterialStateProperty extends MaterialStateProperty<Color?> {
 }
 
 @immutable
-class _BackgroundMaterialStateProperty extends MaterialStateProperty<Color?> {
-  _BackgroundMaterialStateProperty(this.backgroundColor, this.primary);
+class _BackgroundProperty extends MaterialStateProperty<Color?> {
+  _BackgroundProperty(this.backgroundColor, this.primary);
   final Color? backgroundColor;
   final Color? primary;
 
@@ -149,8 +99,8 @@ class _BackgroundMaterialStateProperty extends MaterialStateProperty<Color?> {
 }
 
 @immutable
-class _OverlayMaterialStateProperty extends MaterialStateProperty<Color?> {
-  _OverlayMaterialStateProperty(this.primary);
+class _OverlayProperty extends MaterialStateProperty<Color?> {
+  _OverlayProperty(this.primary);
 
   final Color primary;
 
@@ -172,8 +122,8 @@ class _OverlayMaterialStateProperty extends MaterialStateProperty<Color?> {
 }
 
 @immutable
-class _ElevationMaterialStateProperty extends MaterialStateProperty<double?> {
-  _ElevationMaterialStateProperty(this.elevation)
+class _ElevationProperty extends MaterialStateProperty<double?> {
+  _ElevationProperty(this.elevation)
       : assert(elevation >= 0.0, 'Elevation must be positive.');
 
   final double elevation;
@@ -206,12 +156,26 @@ ButtonStyle defaultStyleOf(BuildContext context) {
   );
 }
 
-class IconicButton extends StatefulWidget {
-  const IconicButton({
+enum ButtonState { selected, unselected, enabled, disabled }
+
+class ButtonController extends ValueNotifier<ButtonState> {
+  ButtonController({ButtonState? value}) : super(value ?? ButtonState.enabled);
+
+  select() => value = ButtonState.selected;
+
+  unSelect() => value = ButtonState.unselected;
+
+  enable() => value = ButtonState.enabled;
+
+  disable() => value = ButtonState.disabled;
+}
+
+class BaseIconicButton extends StatefulWidget {
+  const BaseIconicButton({
     Key? key,
+    required this.state,
     required this.iconData,
     required this.onPressed,
-    required this.controller,
     this.style,
     this.label,
     this.tooltip,
@@ -222,7 +186,8 @@ class IconicButton extends StatefulWidget {
     this.curve,
   }) : super(key: key);
 
-  final IconicController controller;
+  /// Whether this button is enabled, disabled, selected, or unSelected
+  final ButtonState state;
 
   /// An icon is always shown. Will be scaled to fit in tile
   final IconData iconData;
@@ -257,164 +222,194 @@ class IconicButton extends StatefulWidget {
   final Curve? curve;
 
   @override
-  State<StatefulWidget> createState() => IconicButtonState();
+  State<StatefulWidget> createState() => BaseIconicButtonState();
 }
 
-class IconicButtonState extends State<IconicButton> {
-  late IconData _iconData;
-  late String? _label;
-  ButtonStyle? _style;
+class BaseIconicButtonState extends State<BaseIconicButton> {
+  final Set<MaterialState> states = {};
 
-  // void reset({IconData? iconData, String? label, ButtonStyle? style}) {
-  //   setState(() {
-  //     _iconData = iconData ?? _iconData;
-  //     _label = label ?? _label;
-  //     _style = style ?? _style;
-  //   });
-  // }
+  void _update({
+    Set<MaterialState> add = const {},
+    Set<MaterialState> remove = const {},
+  }) {
+    if (add.isNotEmpty || remove.isNotEmpty) {
+      setState(() {
+        states.addAll(add);
+        states.removeAll(remove);
+      });
+    }
+  }
 
-  //final Set<MaterialState> _states = {};
-  // void update({
-  //   Set<MaterialState> add = const {},
-  //   Set<MaterialState> remove = const {},
-  // }) =>
-  //     setState(() {
-  //       if (add.isNotEmpty) _states.addAll(add);
-  //       if (remove.isNotEmpty) _states.removeAll(remove);
-  //     });
-
-  // void select() => update(add: {MaterialState.selected});
-
-  // void unSelect() => update(remove: {MaterialState.selected});
-
-  // void disable() => update(add: {MaterialState.disabled});
-
-  // void enable() => update(remove: {MaterialState.disabled});
-
-  // bool isSelected() => _states.contains(MaterialState.selected);
-
-  // bool isDisabled() => _states.contains(MaterialState.disabled);
-
-  VoidCallback? get _onTap => widget.controller.isDisabled
-      ? null
-      : () {
-          widget.onPressed();
-          widget.controller.update(remove: {MaterialState.pressed});
-        };
-
-  ValueChanged<TapDownDetails>? get _onTapDown => widget.controller.isDisabled
-      ? null
-      : (details) => widget.controller.update(add: {MaterialState.pressed});
-
-  VoidCallback? get _onTapCancel =>
-      () => widget.controller.update(remove: {MaterialState.pressed});
-
-  ValueChanged<bool>? get _onHover => widget.controller.isDisabled
-      ? null
-      : (isHovering) {
-          if (isHovering) {
-            widget.controller.update(add: {MaterialState.hovered});
-          } else {
-            widget.controller.update(remove: {MaterialState.hovered});
-          }
-        };
-
-  ValueChanged<bool>? get _onFocusChange => widget.controller.isDisabled
-      ? null
-      : (isFocused) {
-          if (isFocused) {
-            widget.controller.update(add: {MaterialState.focused});
-          } else {
-            widget.controller.update(remove: {MaterialState.focused});
-          }
-        };
-
-  Color _background(ThemeData theme, ButtonStyle style) =>
-      style.backgroundColor?.resolve(widget.controller.states) ??
-      theme.primaryColor;
-
-  double _elevation(ButtonStyle style) =>
-      style.elevation?.resolve(widget.controller.states) ?? _defaultElevation;
-
-  Color _shadow(ButtonStyle style) =>
-      style.shadowColor?.resolve(widget.controller.states) ?? _defaultShadow;
-
-  InteractiveInkFeatureFactory _splash(ButtonStyle style) =>
-      style.splashFactory ?? _defaultSplash;
-
-  Color _foreground(ThemeData theme, ButtonStyle style) =>
-      style.foregroundColor?.resolve(widget.controller.states) ??
-      theme.colorScheme.onPrimary;
-
-  Size _size(ButtonStyle style) =>
-      style.fixedSize?.resolve(widget.controller.states) ?? _defaultSize;
-
-  TextStyle _textStyle(ThemeData theme, ButtonStyle style) =>
-      style.textStyle?.resolve(widget.controller.states) ??
-      theme.textTheme.caption!;
-
-  EdgeInsetsGeometry _padding(ButtonStyle style) =>
-      style.padding?.resolve(widget.controller.states) ?? _defaultPadding;
+  void _applyButtonState(ButtonState buttonState) {
+    switch (buttonState) {
+      case ButtonState.selected:
+        states.add(MaterialState.selected);
+        break;
+      case ButtonState.unselected:
+        states.remove(MaterialState.selected);
+        break;
+      case ButtonState.enabled:
+        states.remove(MaterialState.disabled);
+        break;
+      case ButtonState.disabled:
+        states.add(MaterialState.disabled);
+        break;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    _style = widget.style;
-    _iconData = widget.iconData;
-    _label = widget.label;
+    _applyButtonState(widget.state);
   }
 
   @override
-  void didUpdateWidget(covariant IconicButton oldWidget) {
+  void didUpdateWidget(covariant BaseIconicButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _style = widget.style;
-    _iconData = widget.iconData;
-    _label = widget.label;
+    if (widget.state != oldWidget.state) {
+      _applyButtonState(widget.state);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return SetListenableBuilder<MaterialState>(
-      valueListenable: widget.controller,
-      builder: (context, states, _) {
-        final theme = Theme.of(context);
-        final ButtonStyle style = _style ?? defaultStyleOf(context);
-        final shape = style.shape?.resolve(states) ?? _defaultShape;
-        Widget button = _IconicMaterial(
-          backgroundColor: _background(theme, style),
-          shape: shape,
-          elevation: _elevation(style),
-          shadowColor: _shadow(style),
-          splashFactory: _splash(style),
-          onTap: _onTap,
-          onTapDown: _onTapDown,
-          onTapCancel: _onTapCancel,
-          onHover: _onHover,
-          onFocusChange: _onFocusChange,
-          duration: widget.changeDuration,
-          curve: widget.curve,
-          child: _IconicContent(
-            iconData: _iconData,
-            label: _label,
-            color: _foreground(theme, style),
-            shape: shape.copyWith(side: BorderSide.none),
-            size: _size(style),
-            textStyle: _textStyle(theme, style),
-            padding: _padding(style),
-            duration: widget.changeDuration,
-            curve: widget.curve,
-          ),
+    final theme = Theme.of(context);
+    final ButtonStyle style = widget.style ?? defaultStyleOf(context);
+    final shape = style.shape?.resolve(states) ?? _defaultShape;
+    final bool isDisabled = states.contains(MaterialState.disabled);
+    Widget button = _IconicMaterial(
+      backgroundColor:
+          style.backgroundColor?.resolve(states) ?? theme.primaryColor,
+      shape: shape,
+      elevation: style.elevation?.resolve(states) ?? _defaultElevation,
+      shadowColor: style.shadowColor?.resolve(states) ?? _defaultShadow,
+      splashFactory: style.splashFactory ?? _defaultSplash,
+      onTap: isDisabled
+          ? null
+          : () {
+              widget.onPressed();
+              _update(remove: {MaterialState.pressed});
+            },
+      onTapDown: isDisabled
+          ? null
+          : (details) => _update(add: {MaterialState.pressed}),
+      onTapCancel: () => _update(remove: {MaterialState.pressed}),
+      onHover: isDisabled
+          ? null
+          : (isHovering) {
+              if (isHovering) {
+                _update(add: {MaterialState.hovered});
+              } else {
+                _update(remove: {MaterialState.hovered});
+              }
+            },
+      onFocusChange: isDisabled
+          ? null
+          : (isFocused) {
+              if (isFocused) {
+                _update(add: {MaterialState.focused});
+              } else {
+                _update(remove: {MaterialState.focused});
+              }
+            },
+      duration: widget.changeDuration,
+      curve: widget.curve,
+      child: _IconicContent(
+        iconData: widget.iconData,
+        label: widget.label,
+        color: style.foregroundColor?.resolve(states) ??
+            theme.colorScheme.onPrimary,
+        shape: shape.copyWith(side: BorderSide.none),
+        size: style.fixedSize?.resolve(states) ?? _defaultSize,
+        textStyle: style.textStyle?.resolve(states) ?? theme.textTheme.caption!,
+        padding: style.padding?.resolve(states) ?? _defaultPadding,
+        duration: widget.changeDuration,
+        curve: widget.curve,
+      ),
+    );
+    if (widget.tooltip != null) {
+      button = Tooltip(
+        message: widget.tooltip!,
+        verticalOffset: widget.tooltipOffset,
+        preferBelow: widget.preferTooltipBelow,
+        waitDuration: widget.waitDuration,
+        child: button,
+      );
+    }
+    return button;
+  }
+}
+
+class IconicButton extends StatelessWidget {
+  const IconicButton({
+    Key? key,
+    required this.controller,
+    required this.iconData,
+    required this.onPressed,
+    this.style,
+    this.label,
+    this.tooltip,
+    this.tooltipOffset,
+    this.preferTooltipBelow,
+    this.waitDuration = const Duration(seconds: 2),
+    this.changeDuration,
+    this.curve,
+  }) : super(key: key);
+
+  /// A ValueNotifier<ButtonState> for controlling whether BaseIconicButton is
+  /// enabled, disabled, selected, or unSelected.
+  final ButtonController controller;
+
+  /// An icon is always shown. Will be scaled to fit in tile
+  final IconData iconData;
+
+  /// Called when button is enabled and tapped
+  final VoidCallback onPressed;
+
+  /// Used to style the button colors and decorations. If not null, it will
+  /// be used instead of any other (convenience) style parameters.
+  final ButtonStyle? style;
+
+  /// Label is optional. If present will be scaled to fit in the tile
+  final String? label;
+
+  /// Optional tooltip. If non-null tile will be wrapped in Tooltip
+  final String? tooltip;
+
+  /// Distance from tile Tooltip will be offset. Default is set by theme or
+  /// otherwise 24.0
+  final double? tooltipOffset;
+
+  /// Tooltip location preference. preferTooltipBelow is true.
+  final bool? preferTooltipBelow;
+
+  /// Hover wait duration before showing tooltip. Default is 2 seconds.
+  final Duration waitDuration;
+
+  /// Duration of changes to this button. Default is 200 milliseconds.
+  final Duration? changeDuration;
+
+  /// Curve of animated changes to this button. Default is linear.
+  final Curve? curve;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<ButtonState>(
+      valueListenable: controller,
+      builder: (context, state, _) {
+        return BaseIconicButton(
+          state: state,
+          iconData: iconData,
+          onPressed: onPressed,
+          style: style,
+          label: label,
+          tooltip: tooltip,
+          tooltipOffset: tooltipOffset,
+          preferTooltipBelow: preferTooltipBelow,
+          waitDuration: waitDuration,
+          changeDuration: changeDuration,
+          curve: curve,
         );
-        if (widget.tooltip != null) {
-          button = Tooltip(
-            message: widget.tooltip!,
-            verticalOffset: widget.tooltipOffset,
-            preferBelow: widget.preferTooltipBelow,
-            waitDuration: widget.waitDuration,
-            child: button,
-          );
-        }
-        return button;
       },
     );
   }
