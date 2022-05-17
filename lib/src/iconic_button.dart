@@ -244,15 +244,18 @@ class BaseIconicButtonState extends State<BaseIconicButton> {
     switch (buttonState) {
       case ButtonState.selected:
         states.add(MaterialState.selected);
+        states.remove(MaterialState.disabled);
         break;
       case ButtonState.unselected:
         states.remove(MaterialState.selected);
+        states.remove(MaterialState.disabled);
         break;
       case ButtonState.enabled:
         states.remove(MaterialState.disabled);
         break;
       case ButtonState.disabled:
         states.add(MaterialState.disabled);
+        states.remove(MaterialState.selected);
         break;
     }
   }
