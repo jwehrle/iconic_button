@@ -1,160 +1,6 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-
-const double _defaultElevation = 0.0;
-const Size _defaultSize = Size(45.0, 40);
-const Color _defaultShadow = Colors.black;
-const OutlinedBorder _defaultShape = const RoundedRectangleBorder(
-  borderRadius: BorderRadius.all(
-    Radius.circular(4),
-  ),
-);
-const EdgeInsets _defaultPadding = EdgeInsets.zero;
-const InteractiveInkFeatureFactory _defaultSplash = InkRipple.splashFactory;
-
-/// Helper function for creating custom ButtonStyle based on ThemeData where
-/// parameters are not provided.
-///
-/// [primary] (the background of the button) [onPrimary] (the foreground of the
-/// button) [onSurface] (the disabled color) are modified jointly when the
-/// button is selected/unselected or disabled/enabled and should be provided
-/// together or left null.
-///
-ButtonStyle buttonStyleFrom({
-  required Color primary,
-  required Color onPrimary,
-  required Color onSurface,
-  Color? shadowColor,
-  double elevation = 0.0,
-  TextStyle? textStyle,
-  EdgeInsetsGeometry? padding,
-  Size? fixedSize,
-  OutlinedBorder? shape,
-  Duration? animationDuration,
-  InteractiveInkFeatureFactory? splashFactory,
-}) {
-  return ButtonStyle(
-    backgroundColor: _BackgroundProperty(primary, onPrimary),
-    foregroundColor: _ForegroundProperty(onPrimary, onSurface, primary),
-    overlayColor: _OverlayProperty(primary),
-    elevation: _ElevationProperty(elevation),
-    animationDuration: animationDuration,
-    splashFactory: splashFactory,
-    shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
-    textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),
-    padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
-    fixedSize: ButtonStyleButton.allOrNull<Size>(fixedSize),
-    shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
-  );
-}
-
-@immutable
-class _ForegroundProperty extends MaterialStateProperty<Color?> {
-  _ForegroundProperty(
-    this.primary,
-    this.onSurface,
-    this.backgroundColor,
-  );
-  final Color? primary;
-  final Color? onSurface;
-  final Color? backgroundColor;
-
-  @override
-  Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.selected)) {
-      return backgroundColor;
-    }
-    if (states.contains(MaterialState.disabled)) {
-      return onSurface?.withOpacity(0.38);
-    }
-    return primary;
-  }
-
-  @override
-  String toString() {
-    return '{selected: $backgroundColor, or if disabled: '
-        '${onSurface?.withOpacity(0.38)}, otherwise: $primary}';
-  }
-}
-
-@immutable
-class _BackgroundProperty extends MaterialStateProperty<Color?> {
-  _BackgroundProperty(this.backgroundColor, this.primary);
-  final Color? backgroundColor;
-  final Color? primary;
-
-  @override
-  Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.selected)) {
-      return primary;
-    }
-    return backgroundColor;
-  }
-
-  @override
-  String toString() {
-    return '{selected: $primary, otherwise: $backgroundColor}';
-  }
-}
-
-@immutable
-class _OverlayProperty extends MaterialStateProperty<Color?> {
-  _OverlayProperty(this.primary);
-
-  final Color primary;
-
-  @override
-  Color? resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.hovered))
-      return primary.withOpacity(0.04);
-    if (states.contains(MaterialState.focused) ||
-        states.contains(MaterialState.pressed))
-      return primary.withOpacity(0.12);
-    return null;
-  }
-
-  @override
-  String toString() {
-    return '{hovered: ${primary.withOpacity(0.04)}, focused, pressed: '
-        '${primary.withOpacity(0.12)}, otherwise: null}';
-  }
-}
-
-@immutable
-class _ElevationProperty extends MaterialStateProperty<double?> {
-  _ElevationProperty(this.elevation)
-      : assert(elevation >= 0.0, 'Elevation must be positive.');
-
-  final double elevation;
-
-  @override
-  double? resolve(Set<MaterialState> states) {
-    return states.contains(MaterialState.hovered) ? elevation * 2.0 : elevation;
-  }
-
-  @override
-  String toString() {
-    return '{hovered: $elevation x 2, otherwise $elevation}';
-  }
-}
-
-ButtonStyle defaultStyleOf(BuildContext context) {
-  final ThemeData theme = Theme.of(context);
-  final ColorScheme colorScheme = theme.colorScheme;
-  return buttonStyleFrom(
-    primary: colorScheme.primary,
-    onPrimary: colorScheme.onPrimary,
-    onSurface: colorScheme.onSurface,
-    shadowColor: theme.shadowColor,
-    fixedSize: _defaultSize,
-    elevation: _defaultElevation,
-    textStyle: theme.textTheme.caption,
-    shape: _defaultShape,
-    animationDuration: kThemeChangeDuration,
-    splashFactory: InkRipple.splashFactory,
-  );
-}
+import 'package:iconic_button/src/animated_widgets.dart';
+import 'package:iconic_button/src/style.dart';
 
 enum ButtonState { selected, unselected, enabled, disabled }
 
@@ -228,7 +74,7 @@ class BaseIconicButton extends StatefulWidget {
 class BaseIconicButtonState extends State<BaseIconicButton> {
   final Set<MaterialState> states = {};
 
-  void _update({
+  void update({
     Set<MaterialState> add = const {},
     Set<MaterialState> remove = const {},
   }) {
@@ -277,55 +123,54 @@ class BaseIconicButtonState extends State<BaseIconicButton> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final ButtonStyle style = widget.style ?? defaultStyleOf(context);
-    final shape = style.shape?.resolve(states) ?? _defaultShape;
+    final ButtonStyle style = widget.style ?? defaultSelectableStyleOf(context);
+    final shape = style.shape?.resolve(states) ?? kDefaultShape;
     final bool isDisabled = states.contains(MaterialState.disabled);
-    Widget button = _IconicMaterial(
+    Widget button = IconicMaterial(
       backgroundColor:
           style.backgroundColor?.resolve(states) ?? theme.primaryColor,
       shape: shape,
-      elevation: style.elevation?.resolve(states) ?? _defaultElevation,
-      shadowColor: style.shadowColor?.resolve(states) ?? _defaultShadow,
-      splashFactory: style.splashFactory ?? _defaultSplash,
+      elevation: style.elevation?.resolve(states) ?? kDefaultElevation,
+      shadowColor: style.shadowColor?.resolve(states) ?? kDefaultShadow,
+      splashFactory: style.splashFactory ?? kDefaultSplash,
       onTap: isDisabled
           ? null
           : () {
               widget.onPressed();
-              _update(remove: {MaterialState.pressed});
+              update(remove: {MaterialState.pressed});
             },
-      onTapDown: isDisabled
-          ? null
-          : (details) => _update(add: {MaterialState.pressed}),
-      onTapCancel: () => _update(remove: {MaterialState.pressed}),
+      onTapDown:
+          isDisabled ? null : (details) => update(add: {MaterialState.pressed}),
+      onTapCancel: () => update(remove: {MaterialState.pressed}),
       onHover: isDisabled
           ? null
           : (isHovering) {
               if (isHovering) {
-                _update(add: {MaterialState.hovered});
+                update(add: {MaterialState.hovered});
               } else {
-                _update(remove: {MaterialState.hovered});
+                update(remove: {MaterialState.hovered});
               }
             },
       onFocusChange: isDisabled
           ? null
           : (isFocused) {
               if (isFocused) {
-                _update(add: {MaterialState.focused});
+                update(add: {MaterialState.focused});
               } else {
-                _update(remove: {MaterialState.focused});
+                update(remove: {MaterialState.focused});
               }
             },
       duration: widget.changeDuration,
       curve: widget.curve,
-      child: _IconicContent(
+      child: IconicContent(
         iconData: widget.iconData,
         label: widget.label,
         color: style.foregroundColor?.resolve(states) ??
             theme.colorScheme.onPrimary,
         shape: shape.copyWith(side: BorderSide.none),
-        size: style.fixedSize?.resolve(states) ?? _defaultSize,
+        size: style.fixedSize?.resolve(states) ?? kDefaultSize,
         textStyle: style.textStyle?.resolve(states) ?? theme.textTheme.caption!,
-        padding: style.padding?.resolve(states) ?? _defaultPadding,
+        padding: style.padding?.resolve(states) ?? kDefaultPadding,
         duration: widget.changeDuration,
         curve: widget.curve,
       ),
@@ -415,180 +260,5 @@ class IconicButton extends StatelessWidget {
         );
       },
     );
-  }
-}
-
-class _IconicMaterial extends ImplicitlyAnimatedWidget {
-  final Color backgroundColor;
-  final double elevation;
-  final Color shadowColor;
-  final OutlinedBorder shape;
-  final Widget child;
-  final VoidCallback? onTap;
-  final ValueChanged<TapDownDetails>? onTapDown;
-  final VoidCallback? onTapCancel;
-  final ValueChanged<bool>? onHover;
-  final ValueChanged<bool>? onFocusChange;
-  final InteractiveInkFeatureFactory? splashFactory;
-
-  _IconicMaterial({
-    Key? key,
-    required this.backgroundColor,
-    required this.shadowColor,
-    required this.shape,
-    required this.child,
-    required this.elevation,
-    this.onTap,
-    this.onTapDown,
-    this.onTapCancel,
-    this.onHover,
-    this.onFocusChange,
-    this.splashFactory,
-    Curve? curve,
-    Duration? duration,
-  }) : super(
-          key: key,
-          curve: curve ?? Curves.linear,
-          duration: duration ?? kThemeChangeDuration,
-        );
-
-  @override
-  _IconicMaterialState createState() => _IconicMaterialState();
-}
-
-class _IconicMaterialState extends AnimatedWidgetBaseState<_IconicMaterial> {
-  ColorTween? _color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: _color!.evaluate(animation)!,
-      elevation: widget.elevation,
-      shadowColor: widget.shadowColor,
-      shape: widget.shape,
-      child: InkWell(
-        customBorder: widget.shape,
-        onTap: widget.onTap,
-        onTapDown: widget.onTapDown,
-        onTapCancel: widget.onTapCancel,
-        onHover: widget.onHover,
-        onFocusChange: widget.onFocusChange,
-        splashFactory: widget.splashFactory,
-        child: widget.child,
-      ),
-    );
-  }
-
-  @override
-  void forEachTween(TweenVisitor<dynamic> visitor) {
-    _color = visitor(
-      _color,
-      widget.backgroundColor,
-      (dynamic value) => ColorTween(begin: value as Color),
-    ) as ColorTween?;
-  }
-}
-
-class _IconicContent extends ImplicitlyAnimatedWidget {
-  final IconData iconData;
-  final Size size;
-  final OutlinedBorder shape;
-  final Color color;
-  final TextStyle textStyle;
-  final String? label;
-  final EdgeInsetsGeometry? padding;
-
-  const _IconicContent({
-    Key? key,
-    required this.iconData,
-    required this.size,
-    required this.shape,
-    required this.color,
-    required this.textStyle,
-    this.label,
-    this.padding,
-    Curve? curve,
-    Duration? duration,
-  }) : super(
-          key: key,
-          curve: curve ?? Curves.linear,
-          duration: duration ?? kThemeChangeDuration,
-        );
-
-  @override
-  _IconicContentState createState() => _IconicContentState();
-}
-
-class _IconicContentState extends AnimatedWidgetBaseState<_IconicContent> {
-  static const double _internalPadding = 3.0;
-  ColorTween? _color;
-
-  double get _radius => min(widget.size.width, widget.size.height) / 2.0;
-
-  double get _sideWidth => (_internalPadding + widget.shape.side.width) / 2.0;
-
-  double get _innerDiameter => (_radius - _sideWidth) * sqrt2;
-
-  double get _innerWidth =>
-      widget.size.width - (_internalPadding + widget.shape.side.width);
-
-  Alignment get _iconAlignment =>
-      widget.label != null ? Alignment.bottomCenter : Alignment.center;
-
-  @override
-  Widget build(BuildContext context) {
-    Color color = _color!.evaluate(animation)!;
-    double innerWidth;
-    Alignment labelAlignment;
-    if (widget.shape is CircleBorder) {
-      innerWidth = _innerDiameter;
-      labelAlignment = Alignment.topCenter;
-    } else {
-      innerWidth = _innerWidth;
-      labelAlignment = Alignment.bottomCenter;
-    }
-    return Container(
-      width: widget.size.width,
-      height: widget.size.height,
-      alignment: Alignment.center,
-      margin: widget.padding,
-      child: SizedBox(
-        width: innerWidth,
-        child: widget.label == null
-            ? FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Icon(widget.iconData, color: color),
-              )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  FittedBox(
-                    alignment: _iconAlignment,
-                    fit: BoxFit.scaleDown,
-                    child: Icon(widget.iconData, color: color),
-                  ),
-                  FittedBox(
-                    alignment: labelAlignment,
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      widget.label!,
-                      style: widget.textStyle.copyWith(color: color),
-                      maxLines: 1,
-                    ),
-                  ),
-                ],
-              ),
-      ),
-    );
-  }
-
-  @override
-  void forEachTween(TweenVisitor<dynamic> visitor) {
-    _color = visitor(
-      _color,
-      widget.color,
-      (dynamic value) => ColorTween(begin: value as Color),
-    ) as ColorTween?;
   }
 }
