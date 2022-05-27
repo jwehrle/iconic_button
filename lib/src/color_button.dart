@@ -94,6 +94,12 @@ class ColorButtonState extends State<ColorButton> {
       duration: widget.changeDuration,
       curve: widget.curve,
     );
+    Size size = style.fixedSize?.resolve(states) ?? kDefaultSize;
+    button = SizedBox(
+      width: size.width,
+      height: size.height,
+      child: button,
+    );
     if (widget.tooltip != null) {
       button = Tooltip(
         message: widget.tooltip!,

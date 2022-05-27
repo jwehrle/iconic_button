@@ -48,11 +48,11 @@ ButtonStyle selectableStyleFrom({
 }
 
 ButtonStyle colorStyleFrom({
+  required Size fixedSize,
   Color? shadowColor,
   double elevation = 0.0,
   TextStyle? textStyle,
   EdgeInsetsGeometry? padding,
-  Size? fixedSize,
   OutlinedBorder? shape,
   Duration? animationDuration,
   InteractiveInkFeatureFactory? splashFactory,
