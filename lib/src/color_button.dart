@@ -57,6 +57,9 @@ class ColorButtonState extends State<ColorButton> {
     if (widget.onPressed == null) {
       states.add(MaterialState.disabled);
     }
+    if (widget.isSelected) {
+      states.add(MaterialState.selected);
+    }
   }
 
   @override
