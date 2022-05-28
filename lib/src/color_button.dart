@@ -12,6 +12,9 @@ class ColorButton extends StatefulWidget {
   final Duration waitDuration;
   final Duration? changeDuration;
   final Curve? curve;
+  final bool selectable;
+  final bool isSelected;
+  final Color checkColor;
 
   const ColorButton({
     Key? key,
@@ -24,6 +27,9 @@ class ColorButton extends StatefulWidget {
     this.waitDuration = const Duration(seconds: 2),
     this.changeDuration,
     this.curve,
+    this.selectable = false,
+    this.isSelected = false,
+    this.checkColor = Colors.white,
   }) : super(key: key);
 
   @override
@@ -93,6 +99,14 @@ class ColorButtonState extends State<ColorButton> {
             },
       duration: widget.changeDuration,
       curve: widget.curve,
+      child: widget.selectable
+          ? AnimatedContainer(
+              duration: widget.changeDuration ?? kThemeChangeDuration,
+              child: states.contains(MaterialState.selected)
+                  ? Icon(Icons.check, color: widget.checkColor)
+                  : null,
+            )
+          : null,
     );
     Size size = style.fixedSize?.resolve(states) ?? kDefaultSize;
     button = SizedBox(
@@ -120,6 +134,13 @@ class ColorButtonState extends State<ColorButton> {
         states.add(MaterialState.disabled);
       } else {
         states.remove(MaterialState.disabled);
+      }
+    }
+    if (widget.isSelected != oldWidget.isSelected) {
+      if (widget.isSelected) {
+        states.add(MaterialState.selected);
+      } else {
+        states.remove(MaterialState.selected);
       }
     }
   }
