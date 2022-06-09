@@ -12,9 +12,11 @@ class ColorButton extends StatefulWidget {
   final Duration waitDuration;
   final Duration? changeDuration;
   final Curve? curve;
+  final bool usePersistentIcon;
   final bool selectable;
   final bool isSelected;
-  final Color checkColor;
+  final Color iconColor;
+  final IconData iconData;
 
   const ColorButton({
     Key? key,
@@ -27,10 +29,16 @@ class ColorButton extends StatefulWidget {
     this.waitDuration = const Duration(seconds: 2),
     this.changeDuration,
     this.curve,
+    this.usePersistentIcon = false,
     this.selectable = false,
     this.isSelected = false,
-    this.checkColor = Colors.white,
-  }) : super(key: key);
+    this.iconColor = Colors.white,
+    this.iconData = Icons.check,
+  })  : assert(
+            !usePersistentIcon || !selectable,
+            'ColorButton cannot both persistently show an icon AND show an icon'
+            ' only when button is selected.'),
+        super(key: key);
 
   @override
   State<StatefulWidget> createState() => ColorButtonState();
@@ -102,14 +110,16 @@ class ColorButtonState extends State<ColorButton> {
             },
       duration: widget.changeDuration,
       curve: widget.curve,
-      child: widget.selectable
-          ? AnimatedContainer(
-              duration: widget.changeDuration ?? kThemeChangeDuration,
-              child: states.contains(MaterialState.selected)
-                  ? Icon(Icons.check, color: widget.checkColor)
-                  : null,
-            )
-          : null,
+      child: widget.usePersistentIcon
+          ? Icon(widget.iconData, color: widget.iconColor)
+          : widget.selectable
+              ? AnimatedContainer(
+                  duration: widget.changeDuration ?? kThemeChangeDuration,
+                  child: states.contains(MaterialState.selected)
+                      ? Icon(widget.iconData, color: widget.iconColor)
+                      : null,
+                )
+              : null,
     );
     Size size = style.fixedSize?.resolve(states) ?? kDefaultSize;
     button = SizedBox(
