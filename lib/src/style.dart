@@ -69,6 +69,33 @@ ButtonStyle colorStyleFrom({
   );
 }
 
+ButtonStyle navigationStyleFrom({
+  required Color primary,
+  required Color onPrimary,
+  Color? onSurface,
+  Color? shadowColor,
+  TextStyle? textStyle,
+  EdgeInsetsGeometry? padding,
+  Size? fixedSize,
+  OutlinedBorder? shape,
+  Duration? animationDuration,
+  InteractiveInkFeatureFactory? splashFactory,
+}) {
+  return ButtonStyle(
+    backgroundColor: ButtonStyleButton.allOrNull<Color>(primary),
+    foregroundColor: _NavigationForegroundProperty(onPrimary),
+    overlayColor: _OverlayProperty(primary),
+    elevation: ButtonStyleButton.allOrNull<double>(0.0),
+    animationDuration: animationDuration,
+    splashFactory: splashFactory,
+    shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
+    textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),
+    padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
+    fixedSize: ButtonStyleButton.allOrNull<Size>(fixedSize),
+    shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
+  );
+}
+
 @immutable
 class _ForegroundProperty extends MaterialStateProperty<Color?> {
   _ForegroundProperty(
@@ -95,6 +122,24 @@ class _ForegroundProperty extends MaterialStateProperty<Color?> {
   String toString() {
     return '{selected: $backgroundColor, or if disabled: '
         '${onSurface?.withOpacity(0.38)}, otherwise: $primary}';
+  }
+}
+
+@immutable
+class _NavigationForegroundProperty extends MaterialStateProperty<Color?> {
+  _NavigationForegroundProperty(this.onPrimary);
+  final Color? onPrimary;
+
+  @override
+  Color? resolve(Set<MaterialState> states) {
+    return states.contains(MaterialState.selected)
+        ? onPrimary
+        : onPrimary?.withOpacity(0.76);
+  }
+
+  @override
+  String toString() {
+    return '{selected: $onPrimary, otherwise: $onPrimary with opacity 76%}';
   }
 }
 
