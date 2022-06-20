@@ -69,6 +69,29 @@ ButtonStyle colorStyleFrom({
   );
 }
 
+ButtonStyle chipStyleFrom({
+  required TextStyle textStyle,
+  required Color backgroundColor,
+  required Color selectedColor,
+  Size? fixedSize,
+  double elevation = 6.0,
+  EdgeInsetsGeometry? padding,
+  OutlinedBorder? shape,
+  Duration? animationDuration,
+  InteractiveInkFeatureFactory? splashFactory,
+}) {
+  return ButtonStyle(
+    backgroundColor: _ChipBackgroundProperty(selectedColor, backgroundColor),
+    elevation: _ElevationProperty(elevation),
+    animationDuration: animationDuration,
+    splashFactory: splashFactory,
+    textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),
+    padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
+    fixedSize: ButtonStyleButton.allOrNull<Size>(fixedSize),
+    shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
+  );
+}
+
 ButtonStyle navigationStyleFrom({
   required Color primary,
   required Color onPrimary,
@@ -164,6 +187,24 @@ class _BackgroundProperty extends MaterialStateProperty<Color?> {
 }
 
 @immutable
+class _ChipBackgroundProperty extends MaterialStateProperty<Color?> {
+  final Color? backgroundColor;
+  final Color? selectedColor;
+
+  _ChipBackgroundProperty(
+    this.backgroundColor,
+    this.selectedColor,
+  );
+
+  @override
+  Color? resolve(Set<MaterialState> states) {
+    return states.contains(MaterialState.selected)
+        ? backgroundColor
+        : selectedColor;
+  }
+}
+
+@immutable
 class _OverlayProperty extends MaterialStateProperty<Color?> {
   _OverlayProperty(this.primary);
 
@@ -231,5 +272,18 @@ ButtonStyle defaultColorStyleOf(BuildContext context) {
     shape: kDefaultShape,
     animationDuration: kThemeChangeDuration,
     splashFactory: InkRipple.splashFactory,
+  );
+}
+
+ButtonStyle defaultChipStyleOf(BuildContext context) {
+  final ThemeData theme = Theme.of(context);
+  const int backgroundAlpha = 0x1f; // 12%
+  const int selectAlpha = 0x3d; // 12% + 12% = 24%
+  return chipStyleFrom(
+    textStyle: DefaultTextStyle.of(context).style,
+    backgroundColor: theme.chipTheme.backgroundColor ??
+        theme.primaryColor.withAlpha(backgroundAlpha),
+    selectedColor: theme.chipTheme.selectedColor ??
+        theme.primaryColor.withAlpha(selectAlpha),
   );
 }
