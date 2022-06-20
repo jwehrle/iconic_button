@@ -55,6 +55,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    Color backgroundColor = isDark ? Colors.grey.shade700 : Colors.white;
+    Color selectedColor = isDark ? Colors.grey.shade500 : Colors.grey.shade300;
+    Color textColor = isDark ? Colors.white : Colors.black87;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -91,12 +95,12 @@ class _MyHomePageState extends State<MyHomePage> {
             IconicChip(
               label: 'IconicChip',
               style: chipStyleFrom(
-                textStyle: const TextStyle(color: Colors.white),
-                backgroundColor: Colors.grey.shade700,
-                selectedColor: Colors.grey.shade600,
+                textStyle: TextStyle(color: textColor),
+                backgroundColor: backgroundColor,
+                selectedColor: selectedColor,
+                padding: const EdgeInsets.all(4.0),
               ),
               labelPadding: const EdgeInsets.all(4.0),
-              padding: const EdgeInsets.all(4.0),
               avatar: const CircleAvatar(
                 radius: 22.5,
                 backgroundColor: Colors.teal,

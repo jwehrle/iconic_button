@@ -5,7 +5,6 @@ class IconicChip extends StatefulWidget {
   final Widget? avatar;
   final String label;
   final EdgeInsetsGeometry? labelPadding;
-  final EdgeInsetsGeometry? padding;
   final VoidCallback? onPressed;
   final ButtonStyle? style;
   final String? tooltip;
@@ -26,7 +25,6 @@ class IconicChip extends StatefulWidget {
     this.onPressed,
     this.avatar,
     this.labelPadding,
-    this.padding,
     this.style,
     this.tooltip,
     this.tooltipOffset,
@@ -45,7 +43,9 @@ class IconicChip extends StatefulWidget {
   State<StatefulWidget> createState() => IconicChipState();
 }
 
-class IconicChipState extends State<IconicChip> {
+class IconicChipState extends State<IconicChip>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
   final Set<MaterialState> states = {};
 
   void update({
@@ -69,6 +69,13 @@ class IconicChipState extends State<IconicChip> {
     if (widget.isSelected) {
       states.add(MaterialState.selected);
     }
+    _controller = AnimationController(
+      vsync: this,
+      duration: widget.changeDuration ?? kThemeChangeDuration,
+      lowerBound: 0.0,
+      upperBound: 1.0,
+      value: states.contains(MaterialState.selected) ? 1.0 : 0.0,
+    );
   }
 
   @override
@@ -84,11 +91,16 @@ class IconicChipState extends State<IconicChip> {
     }
     if (widget.avatar != null) {
       if (widget.usePersistentIcon) {
-        Widget leading = Stack(
-          children: [
-            widget.avatar!,
-            Icon(widget.iconData, color: widget.iconColor),
-          ],
+        Size size = style.fixedSize?.resolve(states) ?? kDefaultSize;
+        Widget leading = SizedBox(
+          width: size.width,
+          height: size.height,
+          child: Stack(
+            children: [
+              widget.avatar!,
+              Center(child: Icon(widget.iconData, color: widget.iconColor)),
+            ],
+          ),
         );
         child = Row(
           mainAxisSize: MainAxisSize.min,
@@ -103,13 +115,11 @@ class IconicChipState extends State<IconicChip> {
           child: Stack(
             children: [
               widget.avatar!,
-              AnimatedContainer(
-                duration: widget.changeDuration ?? kThemeChangeDuration,
-                child: states.contains(MaterialState.selected)
-                    ? Center(
-                        child: Icon(widget.iconData, color: widget.iconColor),
-                      )
-                    : null,
+              FadeTransition(
+                opacity: _controller.view,
+                child: Center(
+                  child: Icon(widget.iconData, color: widget.iconColor),
+                ),
               ),
             ],
           ),
@@ -127,9 +137,10 @@ class IconicChipState extends State<IconicChip> {
         );
       }
     }
-    if (widget.padding != null) {
+    final padding = style.padding?.resolve(states);
+    if (padding != null) {
       child = Padding(
-        padding: widget.padding!,
+        padding: padding,
         child: child,
       );
     }
@@ -197,9 +208,17 @@ class IconicChipState extends State<IconicChip> {
     if (widget.isSelected != oldWidget.isSelected) {
       if (widget.isSelected) {
         states.add(MaterialState.selected);
+        _controller.forward();
       } else {
         states.remove(MaterialState.selected);
+        _controller.reverse();
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }
