@@ -57,6 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     Color backgroundColor = isDark ? Colors.grey.shade700 : Colors.white;
+    // Color outlineColor = isDark ? Colors.grey.shade900 : Colors.grey.shade500;
     Color selectedColor = isDark ? Colors.grey.shade500 : Colors.grey.shade300;
     Color textColor = isDark ? Colors.white : Colors.black87;
     return Scaffold(
@@ -100,6 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 selectedColor: selectedColor,
                 padding: const EdgeInsets.all(4.0),
               ),
+              // outlineColor: outlineColor,
               labelPadding: const EdgeInsets.all(4.0),
               avatar: const CircleAvatar(
                 radius: 22.5,
@@ -107,7 +109,9 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               selectable: true,
               isSelected: threeSelected,
-              onPressed: () => setState(() => threeSelected = !threeSelected),
+              onPressed: (selected) {
+                print(selected ? 'Chip is selected' : 'Chip is not selected');
+              },
             ),
           ],
         ),

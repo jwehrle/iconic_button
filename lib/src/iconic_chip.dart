@@ -2,23 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:iconic_button/button.dart';
 
 class IconicChip extends StatefulWidget {
-  final Widget? avatar;
-  final String label;
-  final EdgeInsetsGeometry? labelPadding;
-  final VoidCallback? onPressed;
-  final ButtonStyle? style;
-  final String? tooltip;
-  final double? tooltipOffset;
-  final bool? preferTooltipBelow;
-  final Duration waitDuration;
-  final Duration? changeDuration;
-  final Curve? curve;
-  final bool usePersistentIcon;
-  final bool selectable;
-  final bool isSelected;
-  final Color iconColor;
-  final IconData iconData;
-
   const IconicChip({
     Key? key,
     required this.label,
@@ -37,7 +20,46 @@ class IconicChip extends StatefulWidget {
     this.isSelected = false,
     this.iconColor = Colors.white,
     this.iconData = Icons.check,
+    this.outlineColor,
   }) : super(key: key);
+
+  /// Generally a CircleAvatar. In this library, the avatar is not darkened
+  /// when selected. That is the primary reason for this class as I did not
+  /// like the stock Material version of FilterChip
+  final Widget? avatar;
+
+  /// A label is required for a chip.
+  final String label;
+
+  /// Optional Padding around the Text(label) widget
+  final EdgeInsetsGeometry? labelPadding;
+
+  /// Optional callback providing the current selection state
+  final ValueChanged<bool>? onPressed;
+
+  /// Optional styling for this widget. Defaults will be used if null.
+  final ButtonStyle? style;
+
+  /// Optional tooltip parameters
+  final String? tooltip;
+  final double? tooltipOffset;
+  final bool? preferTooltipBelow;
+  final Duration waitDuration;
+
+  /// Animation parameters.
+  final Duration? changeDuration;
+  final Curve? curve;
+
+  /// Selection parameters
+  final bool usePersistentIcon;
+  final bool selectable;
+  final bool isSelected;
+  final Color iconColor;
+  final IconData iconData;
+
+  /// Optional outline color is used when shape is null in style, in which
+  /// case this color is applied to a BorderSide of a StadiumBorder.
+  final Color? outlineColor;
 
   @override
   State<StatefulWidget> createState() => IconicChipState();
@@ -81,7 +103,10 @@ class IconicChipState extends State<IconicChip>
   @override
   Widget build(BuildContext context) {
     final ButtonStyle style = widget.style ?? defaultChipStyleOf(context);
-    final shape = style.shape?.resolve(states) ?? StadiumBorder();
+    final shape = style.shape?.resolve(states) ??
+        (widget.outlineColor != null
+            ? StadiumBorder(side: BorderSide(color: widget.outlineColor!))
+            : StadiumBorder());
     Widget child = Text(widget.label, style: style.textStyle?.resolve(states));
     if (widget.labelPadding != null) {
       child = Padding(
@@ -155,8 +180,20 @@ class IconicChipState extends State<IconicChip>
       onTap: isDisabled
           ? null
           : () {
-              if (widget.onPressed != null) widget.onPressed!();
-              update(remove: {MaterialState.pressed});
+              setState(() {
+                if (widget.onPressed != null) {
+                  if (states.contains(MaterialState.selected)) {
+                    states.remove(MaterialState.selected);
+                    widget.onPressed!(false);
+                    _controller.reverse();
+                  } else {
+                    states.add(MaterialState.selected);
+                    widget.onPressed!(true);
+                    _controller.forward();
+                  }
+                }
+                states.remove(MaterialState.pressed);
+              });
             },
       onTapDown:
           isDisabled ? null : (details) => update(add: {MaterialState.pressed}),
@@ -208,10 +245,8 @@ class IconicChipState extends State<IconicChip>
     if (widget.isSelected != oldWidget.isSelected) {
       if (widget.isSelected) {
         states.add(MaterialState.selected);
-        _controller.forward();
       } else {
         states.remove(MaterialState.selected);
-        _controller.reverse();
       }
     }
   }

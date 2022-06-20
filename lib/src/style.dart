@@ -74,7 +74,8 @@ ButtonStyle chipStyleFrom({
   required Color backgroundColor,
   required Color selectedColor,
   Size? fixedSize,
-  double elevation = 6.0,
+  double pressedElevation = 6.0,
+  double defaultElevation = 0.0,
   EdgeInsetsGeometry? padding,
   OutlinedBorder? shape,
   Duration? animationDuration,
@@ -82,7 +83,7 @@ ButtonStyle chipStyleFrom({
 }) {
   return ButtonStyle(
     backgroundColor: _ChipBackgroundProperty(selectedColor, backgroundColor),
-    elevation: _ElevationProperty(elevation),
+    elevation: _ChipElevationProperty(pressedElevation, defaultElevation),
     animationDuration: animationDuration,
     splashFactory: splashFactory,
     textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),
@@ -201,6 +202,21 @@ class _ChipBackgroundProperty extends MaterialStateProperty<Color?> {
     return states.contains(MaterialState.selected)
         ? backgroundColor
         : selectedColor;
+  }
+}
+
+@immutable
+class _ChipElevationProperty extends MaterialStateProperty<double?> {
+  final double? pressedElevation;
+  final double? defaultElevation;
+
+  _ChipElevationProperty(this.pressedElevation, this.defaultElevation);
+
+  @override
+  double? resolve(Set<MaterialState> states) {
+    return states.contains(MaterialState.pressed)
+        ? pressedElevation
+        : defaultElevation;
   }
 }
 
