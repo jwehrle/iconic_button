@@ -10,7 +10,7 @@ class CardChip extends StatefulWidget {
 
   /// Typically IconicChip
   final List<Widget>? choices;
-  final IconData iconData;
+  final IconData? iconData;
   final int maxLines;
   final TextOverflow textOverflow;
 
@@ -43,7 +43,7 @@ class CardChip extends StatefulWidget {
   const CardChip({
     Key? key,
     required this.title,
-    this.iconData = Icons.check,
+    this.iconData,
     this.subtitle,
     this.maxLines = 1,
     this.textOverflow = TextOverflow.ellipsis,
@@ -181,30 +181,32 @@ class CardChipState extends State<CardChip>
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: child,
     );
-    child = Flex(
-      direction: Axis.horizontal,
-      clipBehavior: Clip.none,
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizeTransition(
-          sizeFactor: _controller.view,
-          axis: Axis.horizontal,
-          axisAlignment: -1,
-          child: Padding(
-            padding: const EdgeInsets.only(left: 16.0, top: 16.0),
-            child: FadeTransition(
-              opacity: _controller.view,
-              child: Icon(
-                widget.iconData,
-                color: textStyle?.color?.withOpacity(0.73),
+    if (widget.iconData != null) {
+      child = Flex(
+        direction: Axis.horizontal,
+        clipBehavior: Clip.none,
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizeTransition(
+            sizeFactor: _controller.view,
+            axis: Axis.horizontal,
+            axisAlignment: -1,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16.0, top: 16.0),
+              child: FadeTransition(
+                opacity: _controller.view,
+                child: Icon(
+                  widget.iconData,
+                  color: textStyle?.color?.withOpacity(0.73),
+                ),
               ),
             ),
           ),
-        ),
-        Expanded(child: child),
-      ],
-    );
+          Expanded(child: child),
+        ],
+      );
+    }
     OutlinedBorder shape = style.shape?.resolve(states) ??
         RoundedRectangleBorder(
           borderRadius: BorderRadius.all(
