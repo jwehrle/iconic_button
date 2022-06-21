@@ -57,7 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     Color backgroundColor = isDark ? Colors.grey.shade700 : Colors.white;
-    // Color outlineColor = isDark ? Colors.grey.shade900 : Colors.grey.shade500;
+    Color outlineColor = isDark ? Colors.grey.shade400 : Colors.grey.shade700;
     Color selectedColor = isDark ? Colors.grey.shade500 : Colors.grey.shade300;
     Color textColor = isDark ? Colors.white : Colors.black87;
     return Scaffold(
@@ -101,7 +101,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 selectedColor: selectedColor,
                 padding: const EdgeInsets.all(4.0),
               ),
-              // outlineColor: outlineColor,
               labelPadding: const EdgeInsets.all(4.0),
               avatar: const CircleAvatar(
                 radius: 22.5,
@@ -109,9 +108,57 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               selectable: true,
               isSelected: threeSelected,
-              onPressed: (selected) {
-                print(selected ? 'Chip is selected' : 'Chip is not selected');
-              },
+              onPressed: (selected) {},
+            ),
+            const Padding(
+              padding: EdgeInsets.only(top: 8.0),
+            ),
+            CardChip(
+              title: 'CardChip',
+              subtitle: 'Like a ListTile',
+              labelPadding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              style: chipStyleFrom(
+                textStyle: TextStyle(color: textColor),
+                backgroundColor: backgroundColor,
+                selectedColor: selectedColor,
+                defaultElevation: 2.0,
+                pressedElevation: 6.0,
+                padding: const EdgeInsets.all(4.0),
+              ),
+              onPressed: (selected) {},
+              choices: [
+                IconicChip(
+                  label: 'Option A',
+                  outlineColor: outlineColor,
+                  style: chipStyleFrom(
+                    textStyle: TextStyle(color: textColor),
+                    backgroundColor: backgroundColor,
+                    selectedColor: selectedColor,
+                    padding: const EdgeInsets.all(4.0),
+                  ),
+                  labelPadding: const EdgeInsets.all(4.0),
+                  selectable: true,
+                  onPressed: (selected) {
+                    setState(() {
+                      threeSelected = selected;
+                    });
+                  },
+                ),
+                IconicChip(
+                  label: 'Option B',
+                  outlineColor: outlineColor,
+                  style: chipStyleFrom(
+                    textStyle: TextStyle(color: textColor),
+                    backgroundColor: backgroundColor,
+                    selectedColor: selectedColor,
+                    padding: const EdgeInsets.all(4.0),
+                  ),
+                  labelPadding: const EdgeInsets.all(4.0),
+                  selectable: true,
+                  onPressed: (selected) {},
+                ),
+              ],
             ),
           ],
         ),

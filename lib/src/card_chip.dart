@@ -1,35 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:iconic_button/button.dart';
+import 'package:iconic_button/src/animated_widgets.dart';
 
-class IconicChip extends StatefulWidget {
-  const IconicChip({
-    Key? key,
-    required this.label,
-    this.onPressed,
-    this.avatar,
-    this.labelPadding,
-    this.style,
-    this.tooltip,
-    this.tooltipOffset,
-    this.preferTooltipBelow,
-    this.waitDuration = const Duration(seconds: 2),
-    this.changeDuration,
-    this.curve,
-    this.usePersistentIcon = false,
-    this.selectable = false,
-    this.isSelected = false,
-    this.iconColor = Colors.white,
-    this.iconData = Icons.check,
-    this.outlineColor,
-  }) : super(key: key);
+import 'package:iconic_button/src/iconic_chip.dart';
+import 'package:iconic_button/src/style.dart';
 
-  /// Generally a CircleAvatar. In this library, the avatar is not darkened
-  /// when selected. That is the primary reason for this class as I did not
-  /// like the stock Material version of FilterChip
-  final Widget? avatar;
-
-  /// A label is required for a chip.
-  final String label;
+class CardChip extends StatefulWidget {
+  /// ListTile parameters
+  final String title;
+  final String? subtitle;
+  final List<IconicChip>? choices;
+  final IconData iconData;
 
   /// Optional Padding around the Text(label) widget
   final EdgeInsetsGeometry? labelPadding;
@@ -51,21 +31,36 @@ class IconicChip extends StatefulWidget {
   final Curve? curve;
 
   /// Selection parameters
-  final bool usePersistentIcon;
-  final bool selectable;
   final bool isSelected;
-  final Color iconColor;
-  final IconData iconData;
 
   /// Optional outline color is used when shape is null in style, in which
   /// case this color is applied to a BorderSide of a StadiumBorder.
   final Color? outlineColor;
 
+  const CardChip({
+    Key? key,
+    required this.title,
+    this.iconData = Icons.check,
+    this.subtitle,
+    this.choices,
+    this.labelPadding,
+    this.onPressed,
+    this.style,
+    this.tooltip,
+    this.tooltipOffset,
+    this.preferTooltipBelow,
+    this.waitDuration = const Duration(seconds: 2),
+    this.changeDuration,
+    this.curve,
+    this.isSelected = false,
+    this.outlineColor,
+  }) : super(key: key);
+
   @override
-  State<StatefulWidget> createState() => IconicChipState();
+  State<StatefulWidget> createState() => CardChipState();
 }
 
-class IconicChipState extends State<IconicChip>
+class CardChipState extends State<CardChip>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   final Set<MaterialState> states = {};
@@ -102,73 +97,112 @@ class IconicChipState extends State<IconicChip>
 
   @override
   Widget build(BuildContext context) {
-    final ButtonStyle style = widget.style ?? defaultChipStyleOf(context);
-    final shape = style.shape?.resolve(states) ??
-        (widget.outlineColor != null
-            ? StadiumBorder(side: BorderSide(color: widget.outlineColor!))
-            : StadiumBorder());
-    Widget child = Text(widget.label, style: style.textStyle?.resolve(states));
-    if (widget.labelPadding != null) {
-      child = Padding(
-        padding: widget.labelPadding!,
-        child: child,
-      );
-    }
-    if (widget.avatar != null) {
-      if (widget.usePersistentIcon) {
-        Size size = style.fixedSize?.resolve(states) ?? kDefaultSize;
-        Widget leading = SizedBox(
-          width: size.width,
-          height: size.height,
-          child: Stack(
-            children: [
-              widget.avatar!,
-              Center(child: Icon(widget.iconData, color: widget.iconColor)),
-            ],
+    final theme = Theme.of(context);
+    ButtonStyle style = widget.style ?? defaultChipStyleOf(context);
+    TextStyle? textStyle = style.textStyle?.resolve(states);
+    Widget child = Flex(
+      direction: Axis.vertical,
+      clipBehavior: Clip.none,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flex(
+          direction: Axis.horizontal,
+          clipBehavior: Clip.none,
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text(
+              widget.title,
+              style: theme.textTheme.subtitle1!.merge(
+                textStyle?.copyWith(
+                  color: textStyle.color?.withOpacity(0.87),
+                ),
+              ),
+            ),
+          ],
+        ),
+        if (widget.subtitle != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4.0),
+            child: Flex(
+              direction: Axis.horizontal,
+              clipBehavior: Clip.none,
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  widget.subtitle!,
+                  style: theme.textTheme.bodyText2!.merge(
+                    textStyle?.copyWith(
+                      color: textStyle.color?.withOpacity(0.73),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        );
-        child = Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [leading, child],
-        );
-      } else if (widget.selectable) {
-        Size size = style.fixedSize?.resolve(states) ?? kDefaultSize;
-        Widget leading = SizedBox(
-          width: size.width,
-          height: size.height,
-          child: Stack(
+        if (widget.choices != null)
+          Flex(
+            direction: Axis.horizontal,
+            clipBehavior: Clip.none,
+            mainAxisSize: MainAxisSize.max,
             children: [
-              widget.avatar!,
-              FadeTransition(
-                opacity: _controller.view,
-                child: Center(
-                  child: Icon(widget.iconData, color: widget.iconColor),
+              Expanded(child: Container()),
+              SizeTransition(
+                sizeFactor: _controller.view,
+                axisAlignment: -1,
+                axis: Axis.vertical,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
+                  child: Wrap(
+                    clipBehavior: Clip.none,
+                    alignment: WrapAlignment.end,
+                    runAlignment: WrapAlignment.end,
+                    // crossAxisAlignment: WrapCrossAlignment.end,
+                    spacing: 8.0,
+                    runSpacing: 8.0,
+                    children: widget.choices!,
+                  ),
                 ),
               ),
             ],
           ),
+      ],
+    );
+    child = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+      child: child,
+    );
+    child = Flex(
+      direction: Axis.horizontal,
+      clipBehavior: Clip.none,
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizeTransition(
+          sizeFactor: _controller.view,
+          axis: Axis.horizontal,
+          axisAlignment: -1,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 16.0, top: 16.0),
+            child: FadeTransition(
+              opacity: _controller.view,
+              child: Icon(
+                widget.iconData,
+                color: textStyle?.color?.withOpacity(0.73),
+              ),
+            ),
+          ),
+        ),
+        Expanded(child: child),
+      ],
+    );
+    OutlinedBorder shape = style.shape?.resolve(states) ??
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(4.0),
+          ),
         );
-        child = Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [leading, child],
-        );
-      } else {
-        child = Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [widget.avatar!, child],
-        );
-      }
-    }
-    final padding = style.padding?.resolve(states);
-    if (padding != null) {
-      child = Padding(
-        padding: padding,
-        child: child,
-      );
-    }
     final bool isDisabled = states.contains(MaterialState.disabled);
     Widget button = IconicMaterial(
       backgroundColor: style.backgroundColor?.resolve(states) ??
@@ -220,12 +254,10 @@ class IconicChipState extends State<IconicChip>
       curve: widget.curve,
       child: child,
     );
-    if (widget.tooltip != null) {
-      button = Tooltip(
-        message: widget.tooltip!,
-        verticalOffset: widget.tooltipOffset,
-        preferBelow: widget.preferTooltipBelow,
-        waitDuration: widget.waitDuration,
+    final padding = style.padding?.resolve(states);
+    if (padding != null) {
+      button = Padding(
+        padding: padding,
         child: button,
       );
     }
@@ -233,7 +265,7 @@ class IconicChipState extends State<IconicChip>
   }
 
   @override
-  void didUpdateWidget(covariant IconicChip oldWidget) {
+  void didUpdateWidget(covariant CardChip oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.onPressed != oldWidget.onPressed) {
       if (widget.onPressed == null) {

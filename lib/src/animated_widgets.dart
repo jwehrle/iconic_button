@@ -31,10 +31,10 @@ class IconicMaterial extends ImplicitlyAnimatedWidget {
     Curve? curve,
     Duration? duration,
   }) : super(
-    key: key,
-    curve: curve ?? Curves.linear,
-    duration: duration ?? kThemeChangeDuration,
-  );
+          key: key,
+          curve: curve ?? Curves.linear,
+          duration: duration ?? kThemeChangeDuration,
+        );
 
   @override
   IconicMaterialState createState() => IconicMaterialState();
@@ -68,7 +68,7 @@ class IconicMaterialState extends AnimatedWidgetBaseState<IconicMaterial> {
     _color = visitor(
       _color,
       widget.backgroundColor,
-          (dynamic value) => ColorTween(begin: value as Color),
+      (dynamic value) => ColorTween(begin: value as Color),
     ) as ColorTween?;
   }
 }
@@ -94,10 +94,10 @@ class IconicContent extends ImplicitlyAnimatedWidget {
     Curve? curve,
     Duration? duration,
   }) : super(
-    key: key,
-    curve: curve ?? Curves.linear,
-    duration: duration ?? kThemeChangeDuration,
-  );
+          key: key,
+          curve: curve ?? Curves.linear,
+          duration: duration ?? kThemeChangeDuration,
+        );
 
   @override
   IconicContentState createState() => IconicContentState();
@@ -140,29 +140,29 @@ class IconicContentState extends AnimatedWidgetBaseState<IconicContent> {
         width: innerWidth,
         child: widget.label == null
             ? FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Icon(widget.iconData, color: color),
-        )
+                fit: BoxFit.scaleDown,
+                child: Icon(widget.iconData, color: color),
+              )
             : Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            FittedBox(
-              alignment: _iconAlignment,
-              fit: BoxFit.scaleDown,
-              child: Icon(widget.iconData, color: color),
-            ),
-            FittedBox(
-              alignment: labelAlignment,
-              fit: BoxFit.scaleDown,
-              child: Text(
-                widget.label!,
-                style: widget.textStyle.copyWith(color: color),
-                maxLines: 1,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  FittedBox(
+                    alignment: _iconAlignment,
+                    fit: BoxFit.scaleDown,
+                    child: Icon(widget.iconData, color: color),
+                  ),
+                  FittedBox(
+                    alignment: labelAlignment,
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      widget.label!,
+                      style: widget.textStyle.copyWith(color: color),
+                      maxLines: 1,
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -172,7 +172,7 @@ class IconicContentState extends AnimatedWidgetBaseState<IconicContent> {
     _color = visitor(
       _color,
       widget.color,
-          (dynamic value) => ColorTween(begin: value as Color),
+      (dynamic value) => ColorTween(begin: value as Color),
     ) as ColorTween?;
   }
 }
