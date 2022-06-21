@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:iconic_button/button.dart';
 
+const Size kDefaultAvatarSize = Size(32.0, 32.0);
+
 class IconicChip extends StatefulWidget {
   const IconicChip({
     Key? key,
@@ -20,6 +22,7 @@ class IconicChip extends StatefulWidget {
     this.isSelected = false,
     this.iconColor = Colors.white,
     this.iconData = Icons.check,
+    this.useCheck = true,
     this.outlineColor,
   }) : super(key: key);
 
@@ -56,6 +59,7 @@ class IconicChip extends StatefulWidget {
   final bool isSelected;
   final Color iconColor;
   final IconData iconData;
+  final bool useCheck;
 
   /// Optional outline color is used when shape is null in style, in which
   /// case this color is applied to a BorderSide of a StadiumBorder.
@@ -107,60 +111,77 @@ class IconicChipState extends State<IconicChip>
         (widget.outlineColor != null
             ? StadiumBorder(side: BorderSide(color: widget.outlineColor!))
             : StadiumBorder());
-    Widget child = Text(widget.label, style: style.textStyle?.resolve(states));
+    final TextStyle? textStyle = style.textStyle?.resolve(states);
+    Widget child = Text(widget.label, style: textStyle);
     if (widget.labelPadding != null) {
       child = Padding(
         padding: widget.labelPadding!,
         child: child,
       );
     }
-    if (widget.avatar != null) {
-      if (widget.usePersistentIcon) {
-        Size size = style.fixedSize?.resolve(states) ?? kDefaultSize;
-        Widget leading = SizedBox(
-          width: size.width,
-          height: size.height,
-          child: Stack(
-            children: [
-              widget.avatar!,
-              Center(child: Icon(widget.iconData, color: widget.iconColor)),
-            ],
-          ),
-        );
-        child = Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [leading, child],
-        );
-      } else if (widget.selectable) {
-        Size size = style.fixedSize?.resolve(states) ?? kDefaultSize;
-        Widget leading = SizedBox(
-          width: size.width,
-          height: size.height,
-          child: Stack(
-            children: [
-              widget.avatar!,
-              FadeTransition(
+    Color? iconColor = textStyle?.color ?? widget.iconColor;
+    Size size = style.fixedSize?.resolve(states) ?? kDefaultAvatarSize;
+    if (widget.usePersistentIcon) {
+      Widget leading = SizedBox(
+        width: size.width,
+        height: size.height,
+        child: widget.avatar != null
+            ? Stack(
+                children: [
+                  widget.avatar!,
+                  Center(child: Icon(widget.iconData, color: iconColor)),
+                ],
+              )
+            : Center(child: Icon(widget.iconData, color: iconColor)),
+      );
+      child = Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [leading, child],
+      );
+    } else if (widget.selectable) {
+      Widget leading = widget.avatar != null
+          ? SizedBox(
+              width: size.width,
+              height: size.height,
+              child: Stack(
+                children: [
+                  widget.avatar!,
+                  FadeTransition(
+                    opacity: _controller.view,
+                    child: Center(
+                      child: Icon(widget.iconData, color: iconColor),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : SizeTransition(
+              sizeFactor: _controller.view,
+              axis: Axis.horizontal,
+              axisAlignment: -1,
+              child: FadeTransition(
                 opacity: _controller.view,
-                child: Center(
-                  child: Icon(widget.iconData, color: widget.iconColor),
+                child: SizedBox(
+                  width: size.width,
+                  height: size.height,
+                  child: Center(
+                    child: Icon(widget.iconData, color: iconColor),
+                  ),
                 ),
               ),
-            ],
-          ),
-        );
-        child = Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [leading, child],
-        );
-      } else {
-        child = Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [widget.avatar!, child],
-        );
-      }
+            );
+      child = Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [leading, child],
+      );
+    } else {
+      child = Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: widget.avatar != null ? [widget.avatar!, child] : [child],
+      );
     }
     final padding = style.padding?.resolve(states);
     if (padding != null) {
