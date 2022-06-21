@@ -7,6 +7,8 @@ class IconicChip extends StatefulWidget {
   const IconicChip({
     Key? key,
     required this.label,
+    this.maxLines = 1,
+    this.textOverflow = TextOverflow.ellipsis,
     this.onPressed,
     this.avatar,
     this.labelPadding,
@@ -33,6 +35,8 @@ class IconicChip extends StatefulWidget {
 
   /// A label is required for a chip.
   final String label;
+  final int maxLines;
+  final TextOverflow textOverflow;
 
   /// Optional Padding around the Text(label) widget
   final EdgeInsetsGeometry? labelPadding;
@@ -112,7 +116,12 @@ class IconicChipState extends State<IconicChip>
             ? StadiumBorder(side: BorderSide(color: widget.outlineColor!))
             : StadiumBorder());
     final TextStyle? textStyle = style.textStyle?.resolve(states);
-    Widget child = Text(widget.label, style: textStyle);
+    Widget child = Text(
+      widget.label,
+      style: textStyle,
+      maxLines: widget.maxLines,
+      overflow: widget.textOverflow,
+    );
     if (widget.labelPadding != null) {
       child = Padding(
         padding: widget.labelPadding!,

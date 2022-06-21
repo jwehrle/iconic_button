@@ -10,6 +10,8 @@ class CardChip extends StatefulWidget {
   final String? subtitle;
   final List<IconicChip>? choices;
   final IconData iconData;
+  final int maxLines;
+  final TextOverflow textOverflow;
 
   /// Optional Padding around the Text(label) widget
   final EdgeInsetsGeometry? labelPadding;
@@ -42,6 +44,8 @@ class CardChip extends StatefulWidget {
     required this.title,
     this.iconData = Icons.check,
     this.subtitle,
+    this.maxLines = 1,
+    this.textOverflow = TextOverflow.ellipsis,
     this.choices,
     this.labelPadding,
     this.onPressed,
@@ -118,6 +122,8 @@ class CardChipState extends State<CardChip>
                   color: textStyle.color?.withOpacity(0.87),
                 ),
               ),
+              maxLines: widget.maxLines,
+              overflow: widget.textOverflow,
             ),
           ],
         ),
@@ -137,6 +143,8 @@ class CardChipState extends State<CardChip>
                       color: textStyle.color?.withOpacity(0.73),
                     ),
                   ),
+                  maxLines: widget.maxLines,
+                  overflow: widget.textOverflow,
                 ),
               ],
             ),
