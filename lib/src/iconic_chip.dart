@@ -22,7 +22,7 @@ class IconicChip extends StatefulWidget {
     this.usePersistentIcon = false,
     this.selectable = false,
     this.isSelected = false,
-    this.iconColor = Colors.white,
+    this.iconColor,
     this.iconData = Icons.check,
     this.useCheck = true,
     this.outlineColor,
@@ -61,7 +61,7 @@ class IconicChip extends StatefulWidget {
   final bool usePersistentIcon;
   final bool selectable;
   final bool isSelected;
-  final Color iconColor;
+  final Color? iconColor;
   final IconData iconData;
   final bool useCheck;
 
@@ -128,7 +128,7 @@ class IconicChipState extends State<IconicChip>
         child: child,
       );
     }
-    Color? iconColor = textStyle?.color ?? widget.iconColor;
+    Color? iconColor = widget.iconColor ?? textStyle?.color;
     Size size = style.fixedSize?.resolve(states) ?? kDefaultAvatarSize;
     if (widget.usePersistentIcon) {
       Widget leading = SizedBox(

@@ -106,6 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 radius: 22.5,
                 backgroundColor: Colors.teal,
               ),
+              iconColor: Colors.white,
               selectable: true,
               isSelected: threeSelected,
               onPressed: (selected) {},
