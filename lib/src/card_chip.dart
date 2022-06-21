@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:iconic_button/src/animated_widgets.dart';
 
-import 'package:iconic_button/src/iconic_chip.dart';
 import 'package:iconic_button/src/style.dart';
 
 class CardChip extends StatefulWidget {
   /// ListTile parameters
   final String title;
   final String? subtitle;
-  final List<IconicChip>? choices;
+
+  /// Typically IconicChip
+  final List<Widget>? choices;
   final IconData iconData;
   final int maxLines;
   final TextOverflow textOverflow;
@@ -166,7 +167,6 @@ class CardChipState extends State<CardChip>
                     clipBehavior: Clip.none,
                     alignment: WrapAlignment.end,
                     runAlignment: WrapAlignment.end,
-                    // crossAxisAlignment: WrapCrossAlignment.end,
                     spacing: 8.0,
                     runSpacing: 8.0,
                     children: widget.choices!,
@@ -178,7 +178,7 @@ class CardChipState extends State<CardChip>
       ],
     );
     child = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: child,
     );
     child = Flex(
