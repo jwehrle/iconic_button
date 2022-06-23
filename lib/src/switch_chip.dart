@@ -13,8 +13,7 @@ class SwitchChip extends StatefulWidget {
     this.unselectedAvatar,
     this.labelPadding,
     this.style,
-    this.selectedTooltip,
-    this.unselectedTooltip,
+    this.tooltip,
     this.tooltipOffset,
     this.preferTooltipBelow,
     this.waitDuration = const Duration(seconds: 2),
@@ -24,7 +23,6 @@ class SwitchChip extends StatefulWidget {
     this.isSelected = false,
     this.outlineColor,
   })  : assert(selectedAvatar == null || unselectedAvatar != null),
-        assert(selectedTooltip == null || unselectedTooltip != null),
         super(key: key);
 
   /// Generally a CircleAvatar. In this library, the avatar is not darkened
@@ -49,8 +47,7 @@ class SwitchChip extends StatefulWidget {
   final ButtonStyle? style;
 
   /// Optional tooltip parameters
-  final String? selectedTooltip;
-  final String? unselectedTooltip;
+  final String? tooltip;
   final double? tooltipOffset;
   final bool? preferTooltipBelow;
   final Duration waitDuration;
@@ -202,24 +199,14 @@ class SwitchChipState extends State<SwitchChip> {
       curve: widget.curve,
       child: child,
     );
-    if (widget.selectedTooltip != null) {
-      if (widget.isSelected) {
-        button = Tooltip(
-          message: widget.selectedTooltip!,
-          verticalOffset: widget.tooltipOffset,
-          preferBelow: widget.preferTooltipBelow,
-          waitDuration: widget.waitDuration,
-          child: button,
-        );
-      } else {
-        button = Tooltip(
-          message: widget.unselectedTooltip!,
-          verticalOffset: widget.tooltipOffset,
-          preferBelow: widget.preferTooltipBelow,
-          waitDuration: widget.waitDuration,
-          child: button,
-        );
-      }
+    if (widget.tooltip != null) {
+      button = Tooltip(
+        message: widget.tooltip!,
+        verticalOffset: widget.tooltipOffset,
+        preferBelow: widget.preferTooltipBelow,
+        waitDuration: widget.waitDuration,
+        child: button,
+      );
     }
     return button;
   }
