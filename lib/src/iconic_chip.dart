@@ -212,14 +212,18 @@ class IconicChipState extends State<IconicChip>
           : () {
               setState(() {
                 if (widget.onPressed != null) {
-                  if (states.contains(MaterialState.selected)) {
-                    states.remove(MaterialState.selected);
-                    widget.onPressed!(false);
-                    _controller.reverse();
+                  if (widget.selectable) {
+                    if (states.contains(MaterialState.selected)) {
+                      states.remove(MaterialState.selected);
+                      widget.onPressed!(false);
+                      _controller.reverse();
+                    } else {
+                      states.add(MaterialState.selected);
+                      widget.onPressed!(true);
+                      _controller.forward();
+                    }
                   } else {
-                    states.add(MaterialState.selected);
-                    widget.onPressed!(true);
-                    _controller.forward();
+                    widget.onPressed!(!widget.isSelected);
                   }
                 }
                 states.remove(MaterialState.pressed);
