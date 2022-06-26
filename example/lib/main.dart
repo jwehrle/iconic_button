@@ -48,18 +48,32 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+enum SelectableState { oneA, oneB }
+
 class _MyHomePageState extends State<MyHomePage> {
-  ButtonController controllerOne = ButtonController();
+  final ValueNotifier<SelectableState> _oneNotifier =
+      ValueNotifier(SelectableState.oneA);
   bool twoSelected = false;
   bool threeSelected = false;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     Color backgroundColor = isDark ? Colors.grey.shade700 : Colors.white;
     Color outlineColor = isDark ? Colors.grey.shade400 : Colors.grey.shade700;
     Color selectedColor = isDark ? Colors.grey.shade500 : Colors.grey.shade300;
     Color textColor = isDark ? Colors.white : Colors.black87;
+    String labelOne = 'Label';
+    String labelTwo = 'Longer Label';
+    const padding = EdgeInsets.all(8.0);
+    final textStyle = Theme.of(context).textTheme.caption;
+    double width = iconicRowWidth(
+      [labelOne, labelTwo],
+      textStyle,
+      MediaQuery.of(context).textScaleFactor,
+      padding,
+    );
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -68,14 +82,70 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            IconicButton(
-              controller: controllerOne,
-              iconData: Icons.label,
-              label: 'Label',
-              onPressed: () => controllerOne.value == ButtonState.selected
-                  ? controllerOne.unSelect()
-                  : controllerOne.select(),
-            ),
+            ValueListenableBuilder<SelectableState>(
+                valueListenable: _oneNotifier,
+                builder: (context, value, _) {
+                  return SizedBox(
+                    width: width,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Expanded(
+                          child: BaseIconicButton(
+                            state: value == SelectableState.oneA
+                                ? ButtonState.selected
+                                : ButtonState.unselected,
+                            iconData: Icons.label,
+                            label: labelOne,
+                            style: selectableStyleFrom(
+                              textStyle: textStyle,
+                              primary: theme.primaryColor,
+                              onPrimary: theme.colorScheme.onPrimary,
+                              onSurface: theme.colorScheme.onSurface,
+                              padding: padding,
+                              elevation: 2.0,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(4.0),
+                                  bottomLeft: Radius.circular(4.0),
+                                ),
+                              ),
+                            ),
+                            onPressed: () =>
+                                _oneNotifier.value = SelectableState.oneA,
+                          ),
+                        ),
+                        Expanded(
+                          child: BaseIconicButton(
+                            state: value == SelectableState.oneB
+                                ? ButtonState.selected
+                                : ButtonState.unselected,
+                            // controller: controllerOne,
+                            iconData: Icons.label,
+                            label: labelTwo,
+                            style: selectableStyleFrom(
+                              textStyle: textStyle,
+                              primary: theme.primaryColor,
+                              onPrimary: theme.colorScheme.onPrimary,
+                              onSurface: theme.colorScheme.onSurface,
+                              padding: padding,
+                              elevation: 2.0,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(4.0),
+                                  bottomRight: Radius.circular(4.0),
+                                ),
+                              ),
+                            ),
+                            onPressed: () =>
+                                _oneNotifier.value = SelectableState.oneB,
+                          ),
+                        )
+                      ],
+                    ),
+                  );
+                }),
             const Padding(
               padding: EdgeInsets.only(top: 8.0),
             ),
@@ -166,5 +236,11 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _oneNotifier.dispose();
+    super.dispose();
   }
 }

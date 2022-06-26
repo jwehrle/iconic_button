@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 class IconicMaterial extends ImplicitlyAnimatedWidget {
@@ -104,62 +102,26 @@ class IconicContent extends ImplicitlyAnimatedWidget {
 }
 
 class IconicContentState extends AnimatedWidgetBaseState<IconicContent> {
-  static const double _internalPadding = 3.0;
   ColorTween? _color;
-
-  double get _radius => min(widget.size.width, widget.size.height) / 2.0;
-
-  double get _sideWidth => (_internalPadding + widget.shape.side.width) / 2.0;
-
-  double get _innerDiameter => (_radius - _sideWidth) * sqrt2;
-
-  double get _innerWidth =>
-      widget.size.width - (_internalPadding + widget.shape.side.width);
-
-  Alignment get _iconAlignment =>
-      widget.label != null ? Alignment.bottomCenter : Alignment.center;
 
   @override
   Widget build(BuildContext context) {
     Color color = _color!.evaluate(animation)!;
-    double innerWidth;
-    Alignment labelAlignment;
-    if (widget.shape is CircleBorder) {
-      innerWidth = _innerDiameter;
-      labelAlignment = Alignment.topCenter;
-    } else {
-      innerWidth = _innerWidth;
-      labelAlignment = Alignment.bottomCenter;
-    }
-    return Container(
-      width: widget.size.width,
-      height: widget.size.height,
-      alignment: Alignment.center,
-      margin: widget.padding,
-      child: SizedBox(
-        width: innerWidth,
+    return IntrinsicWidth(
+      child: Container(
+        alignment: Alignment.center,
+        margin: widget.padding,
         child: widget.label == null
-            ? FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Icon(widget.iconData, color: color),
-              )
+            ? Icon(widget.iconData, color: color)
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  FittedBox(
-                    alignment: _iconAlignment,
-                    fit: BoxFit.scaleDown,
-                    child: Icon(widget.iconData, color: color),
-                  ),
-                  FittedBox(
-                    alignment: labelAlignment,
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      widget.label!,
-                      style: widget.textStyle.copyWith(color: color),
-                      maxLines: 1,
-                    ),
+                  Icon(widget.iconData, color: color),
+                  Text(
+                    widget.label!,
+                    style: widget.textStyle.copyWith(color: color),
+                    maxLines: 1,
                   ),
                 ],
               ),

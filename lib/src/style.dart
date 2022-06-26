@@ -11,6 +11,58 @@ const OutlinedBorder kDefaultShape = const RoundedRectangleBorder(
 const EdgeInsets kDefaultPadding = EdgeInsets.zero;
 const InteractiveInkFeatureFactory kDefaultSplash = InkRipple.splashFactory;
 
+/// Finds the width of a label
+double intrinsicLabelWidth(String label, TextStyle? style, double scale) {
+  return (TextPainter(
+          text: TextSpan(text: label, style: style),
+          maxLines: 1,
+          textScaleFactor: scale,
+          textDirection: TextDirection.ltr)
+        ..layout())
+      .minIntrinsicWidth;
+}
+
+/// Finds the length of the longest label.
+double longestLabelIntrinsicWidth(
+  List<String> labelList,
+  TextStyle? style,
+  double scale,
+) {
+  double largestWidth = 0.0;
+  for (var label in labelList) {
+    double width = intrinsicLabelWidth(label, style, scale);
+    if (width > largestWidth) {
+      largestWidth = width;
+    }
+  }
+  return largestWidth;
+}
+
+/// Use to give every labelled button the same width in a row (with Expanded
+/// of FlexFit) even when labels have different lengths. Finds length of
+/// longest label * number of buttons, adds in horizontal padding and any
+/// spacing. Use this value as width in a SizedBox to wrap a Row of labeled
+/// iconic buttons.
+double iconicRowWidth(
+  List<String> labelList,
+  TextStyle? textStyle,
+  double scale,
+  EdgeInsets padding, [
+  double? spacing,
+]) {
+  double maxLabelWidth = longestLabelIntrinsicWidth(
+    labelList,
+    textStyle,
+    scale,
+  );
+  double spacingSum = spacing != null
+      ? (spacing * labelList.length > 1 ? labelList.length - 1 : 0.0)
+      : 0.0;
+  return (maxLabelWidth * labelList.length) +
+      (padding.horizontal * labelList.length) +
+      spacingSum;
+}
+
 /// Helper function for creating custom ButtonStyle based on ThemeData where
 /// parameters are not provided.
 ///
