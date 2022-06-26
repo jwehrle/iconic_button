@@ -46,8 +46,8 @@ double longestLabelIntrinsicWidth(
 double iconicRowWidth(
   List<String> labelList,
   TextStyle? textStyle,
-  double scale,
-  EdgeInsets padding, [
+  double scale, [
+  EdgeInsets? padding,
   double? spacing,
 ]) {
   double maxLabelWidth = longestLabelIntrinsicWidth(
@@ -55,11 +55,12 @@ double iconicRowWidth(
     textStyle,
     scale,
   );
+  double horizontalPadding = padding != null ? padding.horizontal : 0.0;
   double spacingSum = spacing != null
       ? (spacing * labelList.length > 1 ? labelList.length - 1 : 0.0)
       : 0.0;
   return (maxLabelWidth * labelList.length) +
-      (padding.horizontal * labelList.length) +
+      (horizontalPadding * labelList.length) +
       spacingSum;
 }
 
