@@ -93,6 +93,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: [
                         Expanded(
                           child: BaseIconicButton(
+                            showAlertDot: true,
+                            alertDotColor: Colors.deepOrange,
                             state: value == SelectableState.oneA
                                 ? ButtonState.selected
                                 : ButtonState.unselected,

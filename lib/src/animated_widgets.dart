@@ -79,6 +79,8 @@ class IconicContent extends ImplicitlyAnimatedWidget {
   final TextStyle textStyle;
   final String? label;
   final EdgeInsetsGeometry? padding;
+  final bool showAlertDot;
+  final Color alertDotColor;
 
   const IconicContent({
     Key? key,
@@ -91,6 +93,8 @@ class IconicContent extends ImplicitlyAnimatedWidget {
     this.padding,
     Curve? curve,
     Duration? duration,
+    this.showAlertDot = false,
+    this.alertDotColor = Colors.red,
   }) : super(
           key: key,
           curve: curve ?? Curves.linear,
@@ -107,17 +111,33 @@ class IconicContentState extends AnimatedWidgetBaseState<IconicContent> {
   @override
   Widget build(BuildContext context) {
     Color color = _color!.evaluate(animation)!;
+
+    Widget icon = Icon(widget.iconData, color: color);
+    if (widget.showAlertDot) {
+      icon = Stack(
+        children: [
+          icon,
+          Positioned(
+            child: Icon(
+              Icons.brightness_1,
+              color: widget.alertDotColor,
+              size: 9.0,
+            ),
+          ),
+        ],
+      );
+    }
     return IntrinsicWidth(
       child: Container(
         alignment: Alignment.center,
         margin: widget.padding,
         child: widget.label == null
-            ? Icon(widget.iconData, color: color)
+            ? icon
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Icon(widget.iconData, color: color),
+                  icon,
                   Text(
                     widget.label!,
                     style: widget.textStyle.copyWith(color: color),

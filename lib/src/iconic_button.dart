@@ -30,6 +30,8 @@ class BaseIconicButton extends StatefulWidget {
     this.waitDuration = const Duration(seconds: 2),
     this.changeDuration,
     this.curve,
+    this.showAlertDot = false,
+    this.alertDotColor = Colors.red,
   }) : super(key: key);
 
   /// Whether this button is enabled, disabled, selected, or unSelected
@@ -66,6 +68,10 @@ class BaseIconicButton extends StatefulWidget {
 
   /// Curve of animated changes to this button. Default is linear.
   final Curve? curve;
+
+  final bool showAlertDot;
+
+  final Color alertDotColor;
 
   @override
   State<StatefulWidget> createState() => BaseIconicButtonState();
@@ -173,6 +179,8 @@ class BaseIconicButtonState extends State<BaseIconicButton> {
         padding: style.padding?.resolve(states) ?? kDefaultPadding,
         duration: widget.changeDuration,
         curve: widget.curve,
+        showAlertDot: widget.showAlertDot,
+        alertDotColor: widget.alertDotColor,
       ),
     );
     if (widget.tooltip != null) {
@@ -202,6 +210,8 @@ class IconicButton extends StatelessWidget {
     this.waitDuration = const Duration(seconds: 2),
     this.changeDuration,
     this.curve,
+    this.showAlertDot = false,
+    this.alertDotColor = Colors.red,
   }) : super(key: key);
 
   /// A ValueNotifier<ButtonState> for controlling whether BaseIconicButton is
@@ -240,6 +250,10 @@ class IconicButton extends StatelessWidget {
   /// Curve of animated changes to this button. Default is linear.
   final Curve? curve;
 
+  final bool showAlertDot;
+
+  final Color alertDotColor;
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<ButtonState>(
@@ -257,6 +271,8 @@ class IconicButton extends StatelessWidget {
           waitDuration: waitDuration,
           changeDuration: changeDuration,
           curve: curve,
+          showAlertDot: showAlertDot,
+          alertDotColor: alertDotColor,
         );
       },
     );
