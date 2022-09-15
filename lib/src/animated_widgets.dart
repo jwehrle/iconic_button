@@ -71,6 +71,95 @@ class IconicMaterialState extends AnimatedWidgetBaseState<IconicMaterial> {
   }
 }
 
+class IconicGradientMaterial extends ImplicitlyAnimatedWidget {
+  final LinearGradient gradient;
+  final double elevation;
+  final Color shadowColor;
+  final OutlinedBorder shape;
+  final Widget? child;
+  final VoidCallback? onTap;
+  final ValueChanged<TapDownDetails>? onTapDown;
+  final VoidCallback? onTapCancel;
+  final ValueChanged<bool>? onHover;
+  final ValueChanged<bool>? onFocusChange;
+  final InteractiveInkFeatureFactory? splashFactory;
+
+  IconicGradientMaterial({
+    Key? key,
+    required this.gradient,
+    required this.shadowColor,
+    required this.shape,
+    required this.elevation,
+    this.child,
+    this.onTap,
+    this.onTapDown,
+    this.onTapCancel,
+    this.onHover,
+    this.onFocusChange,
+    this.splashFactory,
+    Curve? curve,
+    Duration? duration,
+  }) : super(
+          key: key,
+          curve: curve ?? Curves.linear,
+          duration: duration ?? kThemeChangeDuration,
+        );
+
+  @override
+  IconicGradientMaterialState createState() => IconicGradientMaterialState();
+}
+
+class IconicGradientMaterialState
+    extends AnimatedWidgetBaseState<IconicGradientMaterial> {
+  LinearGradientTween? _gradientTween;
+
+  @override
+  Widget build(BuildContext context) {
+    LinearGradient gradient = _gradientTween!.evaluate(animation)!;
+    return Material(
+      // type: MaterialType.card,
+      // color: _color!.evaluate(animation)!,
+      elevation: widget.elevation,
+      shadowColor: widget.shadowColor,
+      shape: widget.shape,
+      clipBehavior: Clip.antiAlias,
+      child: Ink(
+        decoration: BoxDecoration(gradient: gradient),
+        child: InkWell(
+          customBorder: widget.shape,
+          onTap: widget.onTap,
+          onTapDown: widget.onTapDown,
+          onTapCancel: widget.onTapCancel,
+          onHover: widget.onHover,
+          onFocusChange: widget.onFocusChange,
+          splashFactory: widget.splashFactory,
+          child: widget.child,
+        ),
+      ),
+    );
+  }
+
+  @override
+  void forEachTween(TweenVisitor<dynamic> visitor) {
+    _gradientTween = visitor(
+            _gradientTween,
+            widget.gradient,
+            (dynamic value) =>
+                LinearGradientTween(begin: value as LinearGradient))
+        as LinearGradientTween?;
+  }
+}
+
+class LinearGradientTween extends Tween<LinearGradient?> {
+  LinearGradientTween({LinearGradient? begin, LinearGradient? end})
+      : super(begin: begin, end: end);
+
+  @override
+  LinearGradient? lerp(double t) {
+    return LinearGradient.lerp(begin, end, t);
+  }
+}
+
 class IconicContent extends ImplicitlyAnimatedWidget {
   final IconData iconData;
   final Size size;

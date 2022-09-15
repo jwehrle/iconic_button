@@ -55,6 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ValueNotifier(SelectableState.oneA);
   bool twoSelected = false;
   bool threeSelected = false;
+  bool halfAndHalfSelected = false;
 
   @override
   Widget build(BuildContext context) {
@@ -82,6 +83,25 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            HalfAndHalfColorButton(
+              startColorInt: Colors.black87,
+              endColorInt: Colors.white,
+              iconStartColor: Colors.white,
+              iconEndColor: Colors.black87,
+              selectable: true,
+              iconData: Icons.check,
+              isSelected: halfAndHalfSelected,
+              onPressed: () =>
+                  setState(() => halfAndHalfSelected = !halfAndHalfSelected),
+              style: colorStyleFrom(
+                fixedSize: const Size(45.0, 45.0),
+                shape: const CircleBorder(),
+                elevation: 2.0,
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(top: 8.0),
+            ),
             ValueListenableBuilder<SelectableState>(
                 valueListenable: _oneNotifier,
                 builder: (context, value, _) {
@@ -152,13 +172,14 @@ class _MyHomePageState extends State<MyHomePage> {
               padding: EdgeInsets.only(top: 8.0),
             ),
             ColorButton(
-              colorInt: Colors.deepOrange.value,
+              color: Colors.deepOrange,
               selectable: true,
               iconData: Icons.check,
               isSelected: twoSelected,
               style: colorStyleFrom(
                 fixedSize: const Size(45.0, 45.0),
                 shape: const CircleBorder(),
+                elevation: 2.0,
               ),
               onPressed: () => setState(() => twoSelected = !twoSelected),
             ),
