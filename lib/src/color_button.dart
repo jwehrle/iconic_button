@@ -160,8 +160,8 @@ class ColorButtonState extends State<ColorButton> {
 }
 
 class HalfAndHalfColorButton extends StatefulWidget {
-  final Color startColorInt;
-  final Color endColorInt;
+  final Color startColor;
+  final Color endColor;
   final VoidCallback? onPressed;
   final ButtonStyle? style;
   final String? tooltip;
@@ -179,8 +179,8 @@ class HalfAndHalfColorButton extends StatefulWidget {
 
   const HalfAndHalfColorButton({
     Key? key,
-    required this.startColorInt,
-    required this.endColorInt,
+    required this.startColor,
+    required this.endColor,
     this.onPressed,
     this.style,
     this.tooltip,
@@ -237,15 +237,9 @@ class HalfAndHalfColorButtonState extends State<HalfAndHalfColorButton> {
     final shape = style.shape?.resolve(states) ?? kDefaultShape;
     final bool isDisabled = states.contains(MaterialState.disabled);
     Widget button = IconicGradientMaterial(
-      gradient: LinearGradient(stops: [
-        0.0,
-        0.5,
-        0.5
-      ], colors: [
-        widget.startColorInt,
-        widget.startColorInt,
-        widget.endColorInt
-      ]),
+      gradient: LinearGradient(
+          stops: [0.0, 0.5, 0.5],
+          colors: [widget.startColor, widget.startColor, widget.endColor]),
       shape: shape,
       elevation: style.elevation?.resolve(states) ?? kDefaultElevation,
       shadowColor: style.shadowColor?.resolve(states) ?? kDefaultShadow,

@@ -84,8 +84,8 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             HalfAndHalfColorButton(
-              startColorInt: Colors.black87,
-              endColorInt: Colors.white,
+              startColor: Colors.black87,
+              endColor: Colors.white,
               iconStartColor: Colors.white,
               iconEndColor: Colors.black87,
               selectable: true,
