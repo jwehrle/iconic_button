@@ -159,8 +159,6 @@ class CardChipState extends State<CardChip>
               padding: const EdgeInsets.only(top: 4.0),
               child: Wrap(
                 clipBehavior: Clip.none,
-                alignment: WrapAlignment.end,
-                runAlignment: WrapAlignment.end,
                 spacing: 8.0,
                 runSpacing: 8.0,
                 children: widget.choices!,
