@@ -151,29 +151,21 @@ class CardChipState extends State<CardChip>
             ),
           ),
         if (widget.choices != null)
-          Flex(
-            direction: Axis.horizontal,
-            clipBehavior: Clip.none,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Expanded(child: Container()),
-              SizeTransition(
-                sizeFactor: _controller.view,
-                axisAlignment: -1,
-                axis: Axis.vertical,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 4.0),
-                  child: Wrap(
-                    clipBehavior: Clip.none,
-                    alignment: WrapAlignment.end,
-                    runAlignment: WrapAlignment.end,
-                    spacing: 8.0,
-                    runSpacing: 8.0,
-                    children: widget.choices!,
-                  ),
-                ),
+          SizeTransition(
+            sizeFactor: _controller.view,
+            axisAlignment: -1,
+            axis: Axis.vertical,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 4.0),
+              child: Wrap(
+                clipBehavior: Clip.none,
+                alignment: WrapAlignment.end,
+                runAlignment: WrapAlignment.end,
+                spacing: 8.0,
+                runSpacing: 8.0,
+                children: widget.choices!,
               ),
-            ],
+            ),
           ),
       ],
     );
