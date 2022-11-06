@@ -239,6 +239,9 @@ class _MyHomePageState extends State<MyHomePage> {
                       threeSelected = selected;
                     });
                   },
+                  onLongPress: () {
+                    print('A long pressed');
+                  },
                 ),
                 IconicChip(
                   label: 'Option B',
@@ -252,6 +255,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   labelPadding: const EdgeInsets.all(4.0),
                   selectable: true,
                   onPressed: (selected) {},
+                  onLongPress: () {
+                    print('B long pressed');
+                  },
                 ),
                 IconicChip(
                   label: 'Option C',
@@ -265,6 +271,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   labelPadding: const EdgeInsets.all(4.0),
                   selectable: true,
                   onPressed: (selected) {},
+                  onLongPress: () {
+                    print('C long pressed');
+                  },
                 ),
                 IconicChip(
                   label: 'Option D',
@@ -278,6 +287,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   labelPadding: const EdgeInsets.all(4.0),
                   selectable: true,
                   onPressed: (selected) {},
+                  onLongPress: () {
+                    print('D long pressed');
+                  },
                 ),
                 IconicChip(
                   label: 'Option E',
@@ -291,6 +303,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   labelPadding: const EdgeInsets.all(4.0),
                   selectable: true,
                   onPressed: (selected) {},
+                  onLongPress: () {
+                    print('E long pressed');
+                  },
                 ),
               ],
             ),

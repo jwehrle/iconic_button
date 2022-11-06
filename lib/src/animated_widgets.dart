@@ -6,12 +6,31 @@ class IconicMaterial extends ImplicitlyAnimatedWidget {
   final Color shadowColor;
   final OutlinedBorder shape;
   final Widget? child;
-  final VoidCallback? onTap;
+
+  final GestureTapCallback? onTap;
   final ValueChanged<TapDownDetails>? onTapDown;
-  final VoidCallback? onTapCancel;
+  final GestureTapUpCallback? onTapUp;
+  final GestureTapCancelCallback? onTapCancel;
+  final GestureLongPressCallback? onLongPress;
+  final GestureTapCallback? onDoubleTap;
+
+  final MouseCursor? mouseCursor;
+  final ValueChanged<bool>? onHighlightChanged;
   final ValueChanged<bool>? onHover;
   final ValueChanged<bool>? onFocusChange;
   final InteractiveInkFeatureFactory? splashFactory;
+  final Color? focusColor;
+  final Color? highlightColor;
+  final Color? hoverColor;
+  final MaterialStateProperty<Color?>? overlayColor;
+  final Color? splashColor;
+  final bool autoFocus;
+  final FocusNode? focusNode;
+  final BorderRadius? borderRadius;
+  final double? radius;
+  final bool canRequestFocus;
+  final bool enableFeedback;
+  final bool excludeFromSemantics;
 
   IconicMaterial({
     Key? key,
@@ -20,12 +39,29 @@ class IconicMaterial extends ImplicitlyAnimatedWidget {
     required this.shape,
     required this.elevation,
     this.child,
+    this.onLongPress,
+    this.onDoubleTap,
+    this.onHighlightChanged,
+    this.mouseCursor,
     this.onTap,
     this.onTapDown,
+    this.onTapUp,
     this.onTapCancel,
     this.onHover,
     this.onFocusChange,
     this.splashFactory,
+    this.focusColor,
+    this.highlightColor,
+    this.hoverColor,
+    this.overlayColor,
+    this.splashColor,
+    this.autoFocus = false,
+    this.focusNode,
+    this.borderRadius,
+    this.radius,
+    this.canRequestFocus = true,
+    this.enableFeedback = true,
+    this.excludeFromSemantics = false,
     Curve? curve,
     Duration? duration,
   }) : super(
@@ -50,12 +86,29 @@ class IconicMaterialState extends AnimatedWidgetBaseState<IconicMaterial> {
       shape: widget.shape,
       child: InkWell(
         customBorder: widget.shape,
+        onLongPress: widget.onLongPress,
+        onDoubleTap: widget.onDoubleTap,
         onTap: widget.onTap,
         onTapDown: widget.onTapDown,
+        onTapUp: widget.onTapUp,
         onTapCancel: widget.onTapCancel,
         onHover: widget.onHover,
+        onHighlightChanged: widget.onHighlightChanged,
+        mouseCursor: widget.mouseCursor,
         onFocusChange: widget.onFocusChange,
         splashFactory: widget.splashFactory,
+        focusColor: widget.focusColor,
+        highlightColor: widget.highlightColor,
+        hoverColor: widget.hoverColor,
+        overlayColor: widget.overlayColor,
+        splashColor: widget.splashColor,
+        autofocus: widget.autoFocus,
+        focusNode: widget.focusNode,
+        borderRadius: widget.borderRadius,
+        radius: widget.radius,
+        canRequestFocus: widget.canRequestFocus,
+        enableFeedback: true,
+        excludeFromSemantics: widget.excludeFromSemantics,
         child: widget.child,
       ),
     );

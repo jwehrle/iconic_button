@@ -10,6 +10,7 @@ class IconicChip extends StatefulWidget {
     this.maxLines = 1,
     this.textOverflow = TextOverflow.ellipsis,
     this.onPressed,
+    this.onLongPress,
     this.avatar,
     this.labelPadding,
     this.style,
@@ -43,6 +44,8 @@ class IconicChip extends StatefulWidget {
 
   /// Optional callback providing the current selection state
   final ValueChanged<bool>? onPressed;
+
+  final VoidCallback? onLongPress;
 
   /// Optional styling for this widget. Defaults will be used if null.
   final ButtonStyle? style;
@@ -229,6 +232,7 @@ class IconicChipState extends State<IconicChip>
                 states.remove(MaterialState.pressed);
               });
             },
+      onLongPress: widget.onLongPress,
       onTapDown:
           isDisabled ? null : (details) => update(add: {MaterialState.pressed}),
       onTapCancel: () => update(remove: {MaterialState.pressed}),
