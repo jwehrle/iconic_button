@@ -210,7 +210,8 @@ class _MyHomePageState extends State<MyHomePage> {
             CardChip(
               title: 'CardChip',
               subtitle: 'Like a ListTile',
-              iconData: Icons.check,
+              selectedIconData: Icons.check_box_outlined,
+              unSelectedIconData: Icons.check_box_outline_blank,
               labelPadding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               style: chipStyleFrom(

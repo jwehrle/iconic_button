@@ -10,7 +10,8 @@ class CardChip extends StatefulWidget {
 
   /// Typically IconicChip
   final List<Widget>? choices;
-  final IconData? iconData;
+  final IconData? selectedIconData;
+  final IconData? unSelectedIconData;
   final int maxLines;
   final TextOverflow textOverflow;
 
@@ -43,7 +44,8 @@ class CardChip extends StatefulWidget {
   const CardChip({
     Key? key,
     required this.title,
-    this.iconData,
+    this.selectedIconData,
+    this.unSelectedIconData,
     this.subtitle,
     this.maxLines = 1,
     this.textOverflow = TextOverflow.ellipsis,
@@ -69,6 +71,7 @@ class CardChipState extends State<CardChip>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   final Set<MaterialState> states = {};
+  late final Duration _duration;
 
   void update({
     Set<MaterialState> add = const {},
@@ -91,9 +94,10 @@ class CardChipState extends State<CardChip>
     if (widget.isSelected) {
       states.add(MaterialState.selected);
     }
+    _duration = widget.changeDuration ?? kThemeChangeDuration;
     _controller = AnimationController(
       vsync: this,
-      duration: widget.changeDuration ?? kThemeChangeDuration,
+      duration: _duration,
       lowerBound: 0.0,
       upperBound: 1.0,
       value: states.contains(MaterialState.selected) ? 1.0 : 0.0,
@@ -171,28 +175,50 @@ class CardChipState extends State<CardChip>
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: child,
     );
-    if (widget.iconData != null) {
+    if (widget.selectedIconData != null) {
+      Widget icon;
+      if (widget.unSelectedIconData != null) {
+        icon = Padding(
+          padding: const EdgeInsets.only(left: 16.0, top: 16.0),
+          child: AnimatedSwitcher(
+            duration: _duration,
+            child: states.contains(MaterialState.selected)
+                ? Icon(
+                    widget.selectedIconData,
+                    key: ValueKey('selected_icon'),
+                    color: textStyle?.color?.withOpacity(0.73),
+                  )
+                : Icon(
+                    widget.unSelectedIconData,
+                    key: ValueKey('unselected_icon'),
+                    color: textStyle?.color?.withOpacity(0.73),
+                  ),
+          ),
+        );
+      } else {
+        icon = SizeTransition(
+          sizeFactor: _controller.view,
+          axis: Axis.horizontal,
+          axisAlignment: -1,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 16.0, top: 16.0),
+            child: FadeTransition(
+              opacity: _controller.view,
+              child: Icon(
+                widget.selectedIconData,
+                color: textStyle?.color?.withOpacity(0.73),
+              ),
+            ),
+          ),
+        );
+      }
       child = Flex(
         direction: Axis.horizontal,
         clipBehavior: Clip.none,
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizeTransition(
-            sizeFactor: _controller.view,
-            axis: Axis.horizontal,
-            axisAlignment: -1,
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16.0, top: 16.0),
-              child: FadeTransition(
-                opacity: _controller.view,
-                child: Icon(
-                  widget.iconData,
-                  color: textStyle?.color?.withOpacity(0.73),
-                ),
-              ),
-            ),
-          ),
+          icon,
           Expanded(child: child),
         ],
       );
