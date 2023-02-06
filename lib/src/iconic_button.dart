@@ -1,20 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iconic_button/src/animated_widgets.dart';
+import 'package:iconic_button/src/button_controller.dart';
 import 'package:iconic_button/src/style.dart';
-
-enum ButtonState { selected, unselected, enabled, disabled }
-
-class ButtonController extends ValueNotifier<ButtonState> {
-  ButtonController({ButtonState? value}) : super(value ?? ButtonState.enabled);
-
-  select() => value = ButtonState.selected;
-
-  unSelect() => value = ButtonState.unselected;
-
-  enable() => value = ButtonState.enabled;
-
-  disable() => value = ButtonState.disabled;
-}
 
 class BaseIconicButton extends StatefulWidget {
   const BaseIconicButton({
