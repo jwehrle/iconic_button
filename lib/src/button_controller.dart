@@ -8,13 +8,29 @@ class ButtonController extends ValueNotifier<ButtonState> {
 
   bool get isDisposed => _isDisposed;
 
-  select() => value = ButtonState.selected;
+  select() {
+    if (!_isDisposed) {
+      value = ButtonState.selected;
+    }
+  }
 
-  unSelect() => value = ButtonState.unselected;
+  unSelect() {
+    if (!_isDisposed) {
+      value = ButtonState.unselected;
+    }
+  }
 
-  enable() => value = ButtonState.enabled;
+  enable() {
+    if (!_isDisposed) {
+      value = ButtonState.enabled;
+    }
+  }
 
-  disable() => value = ButtonState.disabled;
+  disable() {
+    if (!_isDisposed) {
+      value = ButtonState.disabled;
+    }
+  }
 
   @override
   void dispose() {
