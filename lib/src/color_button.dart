@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:iconic_button/src/animated_widgets.dart';
 import 'package:iconic_button/src/style.dart';
+import 'package:iconic_button/src/material_state_controller.dart';
+import 'package:collection_value_notifier/collection_value_notifier.dart';
+
+const List<double> _kHalfStops = [0.0, 0.5, 0.5];
 
 class ColorButton extends StatefulWidget {
   final Color color;
@@ -44,118 +48,106 @@ class ColorButton extends StatefulWidget {
   State<StatefulWidget> createState() => ColorButtonState();
 }
 
-class ColorButtonState extends State<ColorButton> {
-  final Set<MaterialState> states = {};
-
-  void update({
-    Set<MaterialState> add = const {},
-    Set<MaterialState> remove = const {},
-  }) {
-    if (add.isNotEmpty || remove.isNotEmpty) {
-      setState(() {
-        states.addAll(add);
-        states.removeAll(remove);
-      });
-    }
-  }
+class ColorButtonState extends State<ColorButton>
+    with MaterialStateDetectorMixin {
+  late final MaterialStateController _stateController;
 
   @override
   void initState() {
     super.initState();
+    Set<MaterialState> states = {};
     if (widget.onPressed == null) {
       states.add(MaterialState.disabled);
     }
     if (widget.isSelected) {
       states.add(MaterialState.selected);
     }
+    _stateController = MaterialStateController(states: states);
+    initStateDetector(
+      controller: _stateController,
+      onPressed: widget.onPressed,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final ButtonStyle style = widget.style ?? defaultColorStyleOf(context);
-    final shape = style.shape?.resolve(states) ?? kDefaultShape;
-    final bool isDisabled = states.contains(MaterialState.disabled);
-    Widget button = IconicMaterial(
-      backgroundColor: widget.color,
-      shape: shape,
-      elevation: style.elevation?.resolve(states) ?? kDefaultElevation,
-      shadowColor: style.shadowColor?.resolve(states) ?? kDefaultShadow,
-      splashFactory: style.splashFactory ?? kDefaultSplash,
-      onTap: isDisabled
-          ? null
-          : () {
-              if (widget.onPressed != null) widget.onPressed!();
-              update(remove: {MaterialState.pressed});
-            },
-      onTapDown:
-          isDisabled ? null : (details) => update(add: {MaterialState.pressed}),
-      onTapCancel: () => update(remove: {MaterialState.pressed}),
-      onHover: isDisabled
-          ? null
-          : (isHovering) {
-              if (isHovering) {
-                update(add: {MaterialState.hovered});
-              } else {
-                update(remove: {MaterialState.hovered});
-              }
-            },
-      onFocusChange: isDisabled
-          ? null
-          : (isFocused) {
-              if (isFocused) {
-                update(add: {MaterialState.focused});
-              } else {
-                update(remove: {MaterialState.focused});
-              }
-            },
-      duration: widget.changeDuration,
-      curve: widget.curve,
-      child: widget.usePersistentIcon
-          ? Icon(widget.iconData, color: widget.iconColor)
-          : widget.selectable
-              ? AnimatedContainer(
-                  duration: widget.changeDuration ?? kThemeChangeDuration,
-                  child: states.contains(MaterialState.selected)
-                      ? Icon(widget.iconData, color: widget.iconColor)
-                      : null,
-                )
-              : null,
+    return SetListenableBuilder<MaterialState>(
+      valueListenable: _stateController.listenable,
+      builder: (context, states, _) {
+        final shape = style.shape?.resolve(states) ?? kDefaultShape;
+        final bool isDisabled = states.contains(MaterialState.disabled);
+        final icon = Icon(widget.iconData, color: widget.iconColor);
+        final selIcon = states.contains(MaterialState.selected) ? icon : null;
+        final child = widget.usePersistentIcon
+            ? icon
+            : widget.selectable
+                ? AnimatedContainer(
+                    duration: widget.changeDuration ?? kThemeChangeDuration,
+                    child: selIcon,
+                  )
+                : null;
+        Widget button = IconicMaterial(
+          backgroundColor: widget.color,
+          shape: shape,
+          elevation: style.elevation?.resolve(states) ?? kDefaultElevation,
+          shadowColor: style.shadowColor?.resolve(states) ?? kDefaultShadow,
+          splashFactory: style.splashFactory ?? kDefaultSplash,
+          onTap: isDisabled ? null : onTap,
+          onTapDown: isDisabled ? null : onTapDown,
+          onTapCancel: onTapCancel,
+          onHover: isDisabled ? null : onHover,
+          onFocusChange: isDisabled ? null : onFocusChanged,
+          duration: widget.changeDuration,
+          curve: widget.curve,
+          child: child,
+        );
+        Size size = style.fixedSize?.resolve(states) ?? kDefaultSize;
+        button = SizedBox(
+          width: size.width,
+          height: size.height,
+          child: button,
+        );
+        if (widget.tooltip != null) {
+          button = Tooltip(
+            message: widget.tooltip!,
+            verticalOffset: widget.tooltipOffset,
+            preferBelow: widget.preferTooltipBelow,
+            waitDuration: widget.waitDuration,
+            child: button,
+          );
+        }
+        return button;
+      },
     );
-    Size size = style.fixedSize?.resolve(states) ?? kDefaultSize;
-    button = SizedBox(
-      width: size.width,
-      height: size.height,
-      child: button,
-    );
-    if (widget.tooltip != null) {
-      button = Tooltip(
-        message: widget.tooltip!,
-        verticalOffset: widget.tooltipOffset,
-        preferBelow: widget.preferTooltipBelow,
-        waitDuration: widget.waitDuration,
-        child: button,
-      );
-    }
-    return button;
   }
 
   @override
   void didUpdateWidget(covariant ColorButton oldWidget) {
     super.didUpdateWidget(oldWidget);
+    final Set<MaterialState> toAdd = {};
+    final Set<MaterialState> toRemove = {};
     if (widget.onPressed != oldWidget.onPressed) {
       if (widget.onPressed == null) {
-        states.add(MaterialState.disabled);
+        toAdd.add(MaterialState.disabled);
       } else {
-        states.remove(MaterialState.disabled);
+        toRemove.add(MaterialState.disabled);
       }
     }
     if (widget.isSelected != oldWidget.isSelected) {
       if (widget.isSelected) {
-        states.add(MaterialState.selected);
+        toAdd.add(MaterialState.selected);
       } else {
-        states.remove(MaterialState.selected);
+        toRemove.add(MaterialState.selected);
       }
     }
+    _stateController.update(toAdd: toAdd, toRemove: toRemove);
+  }
+
+  @override
+  void dispose() {
+    _stateController.dispose();
+    super.dispose();
   }
 }
 
@@ -205,128 +197,116 @@ class HalfAndHalfColorButton extends StatefulWidget {
   State<StatefulWidget> createState() => HalfAndHalfColorButtonState();
 }
 
-class HalfAndHalfColorButtonState extends State<HalfAndHalfColorButton> {
-  final Set<MaterialState> states = {};
-
-  void update({
-    Set<MaterialState> add = const {},
-    Set<MaterialState> remove = const {},
-  }) {
-    if (add.isNotEmpty || remove.isNotEmpty) {
-      setState(() {
-        states.addAll(add);
-        states.removeAll(remove);
-      });
-    }
-  }
+class HalfAndHalfColorButtonState extends State<HalfAndHalfColorButton>
+    with MaterialStateDetectorMixin {
+  late final MaterialStateController _stateController;
 
   @override
   void initState() {
     super.initState();
+    Set<MaterialState> states = {};
     if (widget.onPressed == null) {
       states.add(MaterialState.disabled);
     }
     if (widget.isSelected) {
       states.add(MaterialState.selected);
     }
+    _stateController = MaterialStateController(states: states);
+    initStateDetector(
+      controller: _stateController,
+      onPressed: widget.onPressed,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final ButtonStyle style = widget.style ?? defaultColorStyleOf(context);
-    final shape = style.shape?.resolve(states) ?? kDefaultShape;
-    final bool isDisabled = states.contains(MaterialState.disabled);
-    Widget button = IconicGradientMaterial(
-      gradient: LinearGradient(
-          stops: [0.0, 0.5, 0.5],
-          colors: [widget.startColor, widget.startColor, widget.endColor]),
-      shape: shape,
-      elevation: style.elevation?.resolve(states) ?? kDefaultElevation,
-      shadowColor: style.shadowColor?.resolve(states) ?? kDefaultShadow,
-      splashFactory: style.splashFactory ?? kDefaultSplash,
-      onTap: isDisabled
-          ? null
-          : () {
-              if (widget.onPressed != null) widget.onPressed!();
-              update(remove: {MaterialState.pressed});
-            },
-      onTapDown:
-          isDisabled ? null : (details) => update(add: {MaterialState.pressed}),
-      onTapCancel: () => update(remove: {MaterialState.pressed}),
-      onHover: isDisabled
-          ? null
-          : (isHovering) {
-              if (isHovering) {
-                update(add: {MaterialState.hovered});
-              } else {
-                update(remove: {MaterialState.hovered});
-              }
-            },
-      onFocusChange: isDisabled
-          ? null
-          : (isFocused) {
-              if (isFocused) {
-                update(add: {MaterialState.focused});
-              } else {
-                update(remove: {MaterialState.focused});
-              }
-            },
-      duration: widget.changeDuration,
-      curve: widget.curve,
-      child: widget.usePersistentIcon
-          ? HalfAndHalfIcon(
-              iconData: widget.iconData,
-              startColor: widget.iconStartColor,
-              endColor: widget.iconEndColor,
-            )
-          : widget.selectable
-              ? AnimatedContainer(
-                  duration: widget.changeDuration ?? kThemeChangeDuration,
-                  child: states.contains(MaterialState.selected)
-                      ? HalfAndHalfIcon(
-                          iconData: widget.iconData,
-                          startColor: widget.iconStartColor,
-                          endColor: widget.iconEndColor,
-                        )
-                      : null,
-                )
-              : null,
+    return SetListenableBuilder<MaterialState>(
+      valueListenable: _stateController.listenable,
+      builder: (context, states, _) {
+        final shape = style.shape?.resolve(states) ?? kDefaultShape;
+        final bool isDisabled = states.contains(MaterialState.disabled);
+        final icon = HalfAndHalfIcon(
+          iconData: widget.iconData,
+          startColor: widget.iconStartColor,
+          endColor: widget.iconEndColor,
+        );
+        final selIcon = states.contains(MaterialState.selected) ? icon : null;
+        final child = widget.usePersistentIcon
+            ? icon
+            : widget.selectable
+                ? AnimatedContainer(
+                    duration: widget.changeDuration ?? kThemeChangeDuration,
+                    child: selIcon,
+                  )
+                : null;
+        final colors = <Color>[
+          widget.startColor,
+          widget.startColor,
+          widget.endColor,
+        ];
+        Widget button = IconicGradientMaterial(
+          gradient: LinearGradient(stops: _kHalfStops, colors: colors),
+          shape: shape,
+          elevation: style.elevation?.resolve(states) ?? kDefaultElevation,
+          shadowColor: style.shadowColor?.resolve(states) ?? kDefaultShadow,
+          splashFactory: style.splashFactory ?? kDefaultSplash,
+          onTap: isDisabled ? null : onTap,
+          onTapDown: isDisabled ? null : onTapDown,
+          onTapCancel: onTapCancel,
+          onHover: isDisabled ? null : onHover,
+          onFocusChange: isDisabled ? null : onFocusChanged,
+          duration: widget.changeDuration,
+          curve: widget.curve,
+          child: child,
+        );
+        Size size = style.fixedSize?.resolve(states) ?? kDefaultSize;
+        button = SizedBox(
+          width: size.width,
+          height: size.height,
+          child: button,
+        );
+        if (widget.tooltip != null) {
+          button = Tooltip(
+            message: widget.tooltip!,
+            verticalOffset: widget.tooltipOffset,
+            preferBelow: widget.preferTooltipBelow,
+            waitDuration: widget.waitDuration,
+            child: button,
+          );
+        }
+        return button;
+      },
     );
-    Size size = style.fixedSize?.resolve(states) ?? kDefaultSize;
-    button = SizedBox(
-      width: size.width,
-      height: size.height,
-      child: button,
-    );
-    if (widget.tooltip != null) {
-      button = Tooltip(
-        message: widget.tooltip!,
-        verticalOffset: widget.tooltipOffset,
-        preferBelow: widget.preferTooltipBelow,
-        waitDuration: widget.waitDuration,
-        child: button,
-      );
-    }
-    return button;
   }
 
   @override
   void didUpdateWidget(covariant HalfAndHalfColorButton oldWidget) {
     super.didUpdateWidget(oldWidget);
+    super.didUpdateWidget(oldWidget);
+    final Set<MaterialState> toAdd = {};
+    final Set<MaterialState> toRemove = {};
     if (widget.onPressed != oldWidget.onPressed) {
       if (widget.onPressed == null) {
-        states.add(MaterialState.disabled);
+        toAdd.add(MaterialState.disabled);
       } else {
-        states.remove(MaterialState.disabled);
+        toRemove.add(MaterialState.disabled);
       }
     }
     if (widget.isSelected != oldWidget.isSelected) {
       if (widget.isSelected) {
-        states.add(MaterialState.selected);
+        toAdd.add(MaterialState.selected);
       } else {
-        states.remove(MaterialState.selected);
+        toRemove.add(MaterialState.selected);
       }
     }
+    _stateController.update(toAdd: toAdd, toRemove: toRemove);
+  }
+
+  @override
+  void dispose() {
+    _stateController.dispose();
+    super.dispose();
   }
 }
 
@@ -347,7 +327,7 @@ class HalfAndHalfIcon extends StatelessWidget {
       blendMode: BlendMode.srcATop,
       shaderCallback: (Rect rect) {
         return LinearGradient(
-          stops: [0, 0.5, 0.5],
+          stops: _kHalfStops,
           colors: [startColor, startColor, startColor.withOpacity(0)],
         ).createShader(rect);
       },

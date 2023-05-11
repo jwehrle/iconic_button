@@ -1,5 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:iconic_button/button.dart';
+import 'package:iconic_button/iconic_button.dart';
 
 void main() {
   runApp(const MyApp());
@@ -51,11 +52,10 @@ class MyHomePage extends StatefulWidget {
 enum SelectableState { oneA, oneB }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final ValueNotifier<SelectableState> _oneNotifier =
-      ValueNotifier(SelectableState.oneA);
   bool twoSelected = false;
   bool threeSelected = false;
   bool halfAndHalfSelected = false;
+  bool isLabelOne = true;
 
   @override
   Widget build(BuildContext context) {
@@ -68,13 +68,8 @@ class _MyHomePageState extends State<MyHomePage> {
     String labelOne = 'Label';
     String labelTwo = 'Longer Label';
     const padding = EdgeInsets.all(8.0);
-    final textStyle = Theme.of(context).textTheme.caption;
-    double width = iconicRowWidth(
-      [labelOne, labelTwo],
-      textStyle,
-      MediaQuery.of(context).textScaleFactor,
-      padding,
-    );
+    final textStyle = Theme.of(context).textTheme.bodySmall;
+    final labelStyle = Theme.of(context).textTheme.bodySmall;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -83,6 +78,10 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text('HalfAndHalfColorButton', style: labelStyle),
+            ),
             HalfAndHalfColorButton(
               startColor: Colors.black87,
               endColor: Colors.white,
@@ -102,118 +101,120 @@ class _MyHomePageState extends State<MyHomePage> {
             const Padding(
               padding: EdgeInsets.only(top: 8.0),
             ),
-            ValueListenableBuilder<SelectableState>(
-                valueListenable: _oneNotifier,
-                builder: (context, value, _) {
-                  return SizedBox(
-                    width: width,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Expanded(
-                          child: BaseIconicButton(
-                            showAlertDot: true,
-                            alertDotColor: Colors.deepOrange,
-                            state: value == SelectableState.oneA
-                                ? ButtonState.selected
-                                : ButtonState.unselected,
-                            iconData: Icons.label,
-                            label: labelOne,
-                            style: selectableStyleFrom(
-                              textStyle: textStyle,
-                              primary: theme.primaryColor,
-                              onPrimary: theme.colorScheme.onPrimary,
-                              onSurface: theme.colorScheme.onSurface,
-                              padding: padding,
-                              elevation: 2.0,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(4.0),
-                                  bottomLeft: Radius.circular(4.0),
-                                ),
-                              ),
-                            ),
-                            onPressed: () =>
-                                _oneNotifier.value = SelectableState.oneA,
-                          ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text('Row of BaseIconicButton', style: labelStyle),
+            ),
+        SizedBox(
+          child: IntrinsicWidth(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Expanded(
+                  child: BaseIconicButton(
+                    showAlertDot: true,
+                    alertDotColor: Colors.deepOrange,
+                    state: isLabelOne
+                        ? ButtonState.selected
+                        : ButtonState.unselected,
+                    iconData: Icons.label,
+                    label: labelOne,
+                    style: selectableStyleFrom(
+                      textStyle: textStyle,
+                      primary: theme.primaryColor,
+                      onPrimary: theme.colorScheme.onPrimary,
+                      onSurface: theme.colorScheme.onSurface,
+                      padding: padding,
+                      elevation: 2.0,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(4.0),
+                          bottomLeft: Radius.circular(4.0),
                         ),
-                        Expanded(
-                          child: BaseIconicButton(
-                            state: value == SelectableState.oneB
-                                ? ButtonState.selected
-                                : ButtonState.unselected,
-                            // controller: controllerOne,
-                            iconData: Icons.label,
-                            label: labelTwo,
-                            style: selectableStyleFrom(
-                              textStyle: textStyle,
-                              primary: theme.primaryColor,
-                              onPrimary: theme.colorScheme.onPrimary,
-                              onSurface: theme.colorScheme.onSurface,
-                              padding: padding,
-                              elevation: 2.0,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(4.0),
-                                  bottomRight: Radius.circular(4.0),
-                                ),
-                              ),
-                            ),
-                            onPressed: () =>
-                                _oneNotifier.value = SelectableState.oneB,
-                          ),
-                        )
-                      ],
+                      ),
                     ),
-                  );
-                }),
+                    onPressed: () => setState(() => isLabelOne = !isLabelOne),
+                  ),
+                ),
+                Expanded(
+                  child: BaseIconicButton(
+                    state: !isLabelOne
+                        ? ButtonState.selected
+                        : ButtonState.unselected,
+                    iconData: Icons.label,
+                    label: labelTwo,
+                    style: selectableStyleFrom(
+                      textStyle: textStyle,
+                      primary: theme.primaryColor,
+                      onPrimary: theme.colorScheme.onPrimary,
+                      onSurface: theme.colorScheme.onSurface,
+                      padding: padding,
+                      elevation: 2.0,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(4.0),
+                          bottomRight: Radius.circular(4.0),
+                        ),
+                      ),
+                    ),
+                    onPressed: () => setState(() => isLabelOne = !isLabelOne),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
             const Padding(
-              padding: EdgeInsets.only(top: 8.0),
+              padding: EdgeInsets.only(top: 16.0),
             ),
-            ColorButton(
-              color: Colors.deepOrange,
-              selectable: true,
-              iconData: Icons.check,
-              isSelected: twoSelected,
-              style: colorStyleFrom(
-                fixedSize: const Size(45.0, 45.0),
-                shape: const CircleBorder(),
-                elevation: 2.0,
-              ),
-              onPressed: () => setState(() => twoSelected = !twoSelected),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text('ColorButton', style: labelStyle),
             ),
+        ColorButton(
+          color: Colors.deepOrange,
+          selectable: true,
+          iconData: Icons.check,
+          isSelected: twoSelected,
+          style: colorStyleFrom(
+            fixedSize: const Size(45.0, 45.0),
+            shape: const CircleBorder(),
+            elevation: 2.0,
+          ),
+          onPressed: () => setState(() => twoSelected = !twoSelected),
+        ),
             const Padding(
-              padding: EdgeInsets.only(top: 8.0),
+              padding: EdgeInsets.only(top: 16.0),
             ),
-            IconicChip(
-              label: 'IconicChip',
-              style: chipStyleFrom(
-                textStyle: TextStyle(color: textColor),
-                backgroundColor: backgroundColor,
-                selectedColor: selectedColor,
-                padding: const EdgeInsets.all(4.0),
-              ),
-              labelPadding: const EdgeInsets.all(4.0),
-              avatar: const CircleAvatar(
-                radius: 22.5,
-                backgroundColor: Colors.teal,
-              ),
-              iconColor: Colors.white,
-              selectable: true,
-              isSelected: threeSelected,
-              onPressed: (selected) {},
-            ),
+        IconicChip(
+          label: 'IconicChip',
+          style: chipStyleFrom(
+            textStyle: TextStyle(color: textColor),
+            backgroundColor: backgroundColor,
+            selectedColor: selectedColor,
+            padding: const EdgeInsets.all(4.0),
+          ),
+          labelPadding: const EdgeInsets.all(4.0),
+          avatar: const CircleAvatar(
+            radius: 22.5,
+            backgroundColor: Colors.teal,
+          ),
+          iconColor: Colors.white,
+          selectable: true,
+          isSelected: threeSelected,
+          onPressed: (selected) {},
+        ),
             const Padding(
               padding: EdgeInsets.only(top: 8.0),
             ),
             CardChip(
               title: 'CardChip',
-              subtitle: 'Like a ListTile',
+              subtitle: 'Like a ListTile, with IconicChip options',
               selectedIconData: Icons.check_box_outlined,
               unSelectedIconData: Icons.check_box_outline_blank,
               labelPadding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               style: chipStyleFrom(
                 textStyle: TextStyle(color: textColor),
                 backgroundColor: backgroundColor,
@@ -241,7 +242,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     });
                   },
                   onLongPress: () {
-                    print('A long pressed');
+                    if (kDebugMode) {
+                      print('A long pressed');
+                    }
                   },
                 ),
                 IconicChip(
@@ -257,7 +260,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   selectable: true,
                   onPressed: (selected) {},
                   onLongPress: () {
-                    print('B long pressed');
+                    if (kDebugMode) {
+                      print('B long pressed');
+                    }
                   },
                 ),
                 IconicChip(
@@ -273,7 +278,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   selectable: true,
                   onPressed: (selected) {},
                   onLongPress: () {
-                    print('C long pressed');
+                    if (kDebugMode) {
+                      print('C long pressed');
+                    }
                   },
                 ),
                 IconicChip(
@@ -289,7 +296,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   selectable: true,
                   onPressed: (selected) {},
                   onLongPress: () {
-                    print('D long pressed');
+                    if (kDebugMode) {
+                      print('D long pressed');
+                    }
                   },
                 ),
                 IconicChip(
@@ -305,7 +314,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   selectable: true,
                   onPressed: (selected) {},
                   onLongPress: () {
-                    print('E long pressed');
+                    if (kDebugMode) {
+                      print('E long pressed');
+                    }
                   },
                 ),
               ],
@@ -314,11 +325,5 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _oneNotifier.dispose();
-    super.dispose();
   }
 }

@@ -1,8 +1,16 @@
+import 'package:collection_value_notifier/collection_value_notifier.dart';
 import 'package:flutter/material.dart';
-import 'package:iconic_button/button.dart';
+import 'package:iconic_button/iconic_button.dart';
+import 'package:iconic_button/src/material_state_controller.dart';
 
 const Size kDefaultAvatarSize = Size(32.0, 32.0);
 
+/// A Button based on the standard Chip but which maintains a state,
+/// [isSelected] which enables more complex behavior such as avatar widgets
+/// that change based on selection status, visual changes based on
+/// [MaterialState] and all visual changes mediated through implicit animations.
+///
+/// Unlike [FilterChip] the avatar is NOT darkened based on [isSelected] state.
 class IconicChip extends StatefulWidget {
   const IconicChip({
     Key? key,
@@ -25,7 +33,6 @@ class IconicChip extends StatefulWidget {
     this.isSelected = false,
     this.iconColor,
     this.iconData = Icons.check,
-    this.useCheck = true,
     this.outlineColor,
   }) : super(key: key);
 
@@ -36,37 +43,59 @@ class IconicChip extends StatefulWidget {
 
   /// A label is required for a chip.
   final String label;
+
+  /// Max lines of label, defaults to 1.
   final int maxLines;
+
+  /// How to handle text overflow, defaults to [TextOverflow.ellipsis]
   final TextOverflow textOverflow;
 
   /// Optional Padding around the Text(label) widget
   final EdgeInsetsGeometry? labelPadding;
 
-  /// Optional callback providing the current selection state
+  /// Optional callback providing the current selection state. Defines whether
+  /// chip state is [MaterialState.disabled] or not (null == disabled).
   final ValueChanged<bool>? onPressed;
 
+  /// Optional long press callback
   final VoidCallback? onLongPress;
 
   /// Optional styling for this widget. Defaults will be used if null.
   final ButtonStyle? style;
 
-  /// Optional tooltip parameters
+  /// Optional tooltip
   final String? tooltip;
+
+  /// Offset of tooltip message
   final double? tooltipOffset;
+
+  /// Preference location of tooltip
   final bool? preferTooltipBelow;
+
+  /// Duration to wait for tooltip popup
   final Duration waitDuration;
 
-  /// Animation parameters.
+  /// Animation duration for implicit changes.
   final Duration? changeDuration;
+
+  /// Animation curve for implicit changes
   final Curve? curve;
 
-  /// Selection parameters
+  /// I true, icon will display regardless of selection state. If false,
+  /// icon will be shown only if [isSelected] is true.
   final bool usePersistentIcon;
+
+  /// Whether this widget changes state based on clicks.
   final bool selectable;
+
+  /// The base state of this widget.
   final bool isSelected;
+
+  /// The color of the icon, if shown.
   final Color? iconColor;
+
+  /// The icon to display, defaults to [Icons.check]
   final IconData iconData;
-  final bool useCheck;
 
   /// Optional outline color is used when shape is null in style, in which
   /// case this color is applied to a BorderSide of a StadiumBorder.
@@ -77,31 +106,23 @@ class IconicChip extends StatefulWidget {
 }
 
 class IconicChipState extends State<IconicChip>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, MaterialStateDetectorMixin {
   late final AnimationController _controller;
-  final Set<MaterialState> states = {};
+  late final MaterialStateController _stateController;
 
-  void update({
-    Set<MaterialState> add = const {},
-    Set<MaterialState> remove = const {},
-  }) {
-    if (add.isNotEmpty || remove.isNotEmpty) {
-      setState(() {
-        states.addAll(add);
-        states.removeAll(remove);
-      });
-    }
-  }
-
+  /// Assign [_states] based [widget.onSelect] and [widget.isSelected] and
+  /// initialize [_controller].
   @override
   void initState() {
     super.initState();
+    Set<MaterialState> states = {};
     if (widget.onPressed == null) {
       states.add(MaterialState.disabled);
     }
     if (widget.isSelected) {
       states.add(MaterialState.selected);
     }
+    _stateController = MaterialStateController(states: states);
     _controller = AnimationController(
       vsync: this,
       duration: widget.changeDuration ?? kThemeChangeDuration,
@@ -109,191 +130,185 @@ class IconicChipState extends State<IconicChip>
       upperBound: 1.0,
       value: states.contains(MaterialState.selected) ? 1.0 : 0.0,
     );
+    initStateDetector(
+      controller: _stateController,
+      onSelect: widget.onPressed,
+      selectable: widget.selectable,
+      animateForward: _controller.forward,
+      animateReverse: _controller.reverse,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final ButtonStyle style = widget.style ?? defaultChipStyleOf(context);
-    final shape = style.shape?.resolve(states) ??
-        (widget.outlineColor != null
-            ? StadiumBorder(side: BorderSide(color: widget.outlineColor!))
-            : StadiumBorder());
-    final TextStyle? textStyle = style.textStyle?.resolve(states);
-    Widget child = Text(
-      widget.label,
-      style: textStyle,
-      maxLines: widget.maxLines,
-      overflow: widget.textOverflow,
-    );
-    if (widget.labelPadding != null) {
-      child = Padding(
-        padding: widget.labelPadding!,
-        child: child,
-      );
-    }
-    Color? iconColor = widget.iconColor ?? textStyle?.color;
-    Size size = style.fixedSize?.resolve(states) ?? kDefaultAvatarSize;
-    if (widget.usePersistentIcon) {
-      Widget leading = SizedBox(
-        width: size.width,
-        height: size.height,
-        child: widget.avatar != null
-            ? Stack(
-                children: [
-                  widget.avatar!,
-                  Center(child: Icon(widget.iconData, color: iconColor)),
-                ],
-              )
-            : Center(child: Icon(widget.iconData, color: iconColor)),
-      );
-      child = Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [leading, child],
-      );
-    } else if (widget.selectable) {
-      Widget leading = widget.avatar != null
-          ? SizedBox(
-              width: size.width,
-              height: size.height,
-              child: Stack(
-                children: [
-                  widget.avatar!,
-                  FadeTransition(
+    return SetListenableBuilder<MaterialState>(
+      valueListenable: _stateController.listenable,
+      builder: (context, states, _) {
+        final effectiveStyle = widget.style ?? defaultChipStyleOf(context);
+
+        final textStyle = effectiveStyle.textStyle?.resolve(states);
+
+        // Build up chip in stages
+        Widget child = Text(
+          widget.label,
+          style: textStyle,
+          maxLines: widget.maxLines,
+          overflow: widget.textOverflow,
+        );
+
+        if (widget.labelPadding != null) {
+          child = Padding(
+            padding: widget.labelPadding!,
+            child: child,
+          );
+        }
+
+        final icon = Center(
+          child: Icon(widget.iconData,
+              color: widget.iconColor ?? textStyle?.color),
+        );
+
+        final effectiveSize =
+            effectiveStyle.fixedSize?.resolve(states) ?? kDefaultAvatarSize;
+
+        if (widget.usePersistentIcon) {
+          child = Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: effectiveSize.width,
+                height: effectiveSize.height,
+                child: widget.avatar != null
+                    ? Stack(children: [widget.avatar!, icon])
+                    : icon,
+              ),
+              child,
+            ],
+          );
+        } else if (widget.selectable) {
+          final leading = widget.avatar != null
+              ? SizedBox(
+                  width: effectiveSize.width,
+                  height: effectiveSize.height,
+                  child: Stack(
+                    children: [
+                      widget.avatar!,
+                      FadeTransition(opacity: _controller.view, child: icon),
+                    ],
+                  ),
+                )
+              : SizeTransition(
+                  sizeFactor: _controller.view,
+                  axis: Axis.horizontal,
+                  axisAlignment: -1,
+                  child: FadeTransition(
                     opacity: _controller.view,
-                    child: Center(
-                      child: Icon(widget.iconData, color: iconColor),
+                    child: SizedBox(
+                      width: effectiveSize.width,
+                      height: effectiveSize.height,
+                      child: icon,
                     ),
                   ),
-                ],
-              ),
-            )
-          : SizeTransition(
-              sizeFactor: _controller.view,
-              axis: Axis.horizontal,
-              axisAlignment: -1,
-              child: FadeTransition(
-                opacity: _controller.view,
-                child: SizedBox(
-                  width: size.width,
-                  height: size.height,
-                  child: Center(
-                    child: Icon(widget.iconData, color: iconColor),
-                  ),
-                ),
-              ),
-            );
-      child = Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [leading, child],
-      );
-    } else {
-      child = Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: widget.avatar != null ? [widget.avatar!, child] : [child],
-      );
-    }
-    final padding = style.padding?.resolve(states);
-    if (padding != null) {
-      child = Padding(
-        padding: padding,
-        child: child,
-      );
-    }
-    final bool isDisabled = states.contains(MaterialState.disabled);
-    Widget button = IconicMaterial(
-      backgroundColor: style.backgroundColor?.resolve(states) ??
-          Theme.of(context).primaryColor,
-      shape: shape,
-      elevation: style.elevation?.resolve(states) ?? kDefaultElevation,
-      shadowColor: style.shadowColor?.resolve(states) ?? kDefaultShadow,
-      splashFactory: style.splashFactory ?? kDefaultSplash,
-      onTap: isDisabled
-          ? null
-          : () {
-              setState(() {
-                if (widget.onPressed != null) {
-                  if (widget.selectable) {
-                    if (states.contains(MaterialState.selected)) {
-                      states.remove(MaterialState.selected);
-                      widget.onPressed!(false);
-                      _controller.reverse();
-                    } else {
-                      states.add(MaterialState.selected);
-                      widget.onPressed!(true);
-                      _controller.forward();
-                    }
-                  } else {
-                    widget.onPressed!(!widget.isSelected);
-                  }
-                }
-                states.remove(MaterialState.pressed);
-              });
-            },
-      onLongPress: widget.onLongPress,
-      onTapDown:
-          isDisabled ? null : (details) => update(add: {MaterialState.pressed}),
-      onTapCancel: () => update(remove: {MaterialState.pressed}),
-      onHover: isDisabled
-          ? null
-          : (isHovering) {
-              if (isHovering) {
-                update(add: {MaterialState.hovered});
-              } else {
-                update(remove: {MaterialState.hovered});
-              }
-            },
-      onFocusChange: isDisabled
-          ? null
-          : (isFocused) {
-              if (isFocused) {
-                update(add: {MaterialState.focused});
-              } else {
-                update(remove: {MaterialState.focused});
-              }
-            },
-      duration: widget.changeDuration,
-      curve: widget.curve,
-      child: child,
+                );
+
+          child = Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              leading,
+              child,
+            ],
+          );
+        } else {
+          child = Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: widget.avatar != null ? [widget.avatar!, child] : [child],
+          );
+        }
+
+        final padding = effectiveStyle.padding?.resolve(states);
+
+        if (padding != null) {
+          child = Padding(
+            padding: padding,
+            child: child,
+          );
+        }
+
+        final isDisabled = states.contains(MaterialState.disabled);
+
+        Widget button = IconicMaterial(
+          backgroundColor: effectiveStyle.backgroundColor?.resolve(states) ??
+              Theme.of(context).primaryColor,
+          shape: effectiveStyle.shape?.resolve(states) ??
+              (widget.outlineColor != null
+                  ? StadiumBorder(side: BorderSide(color: widget.outlineColor!))
+                  : StadiumBorder()),
+          elevation:
+              effectiveStyle.elevation?.resolve(states) ?? kDefaultElevation,
+          shadowColor:
+              effectiveStyle.shadowColor?.resolve(states) ?? kDefaultShadow,
+          splashFactory: effectiveStyle.splashFactory ?? kDefaultSplash,
+          onTap: isDisabled ? null : onTap,
+          onLongPress: widget.onLongPress,
+          onTapDown: isDisabled ? null : onTapDown,
+          onTapCancel: onTapCancel,
+          onHover: isDisabled ? null : onHover,
+          onFocusChange: isDisabled ? null : onFocusChanged,
+          duration: widget.changeDuration,
+          curve: widget.curve,
+          child: child,
+        );
+
+        if (widget.tooltip != null) {
+          button = Tooltip(
+            message: widget.tooltip!,
+            verticalOffset: widget.tooltipOffset,
+            preferBelow: widget.preferTooltipBelow,
+            waitDuration: widget.waitDuration,
+            child: button,
+          );
+        }
+
+        return button;
+      },
     );
-    if (widget.tooltip != null) {
-      button = Tooltip(
-        message: widget.tooltip!,
-        verticalOffset: widget.tooltipOffset,
-        preferBelow: widget.preferTooltipBelow,
-        waitDuration: widget.waitDuration,
-        child: button,
-      );
-    }
-    return button;
   }
 
+  /// Check for changes in [widget.onSelect] or [widget.isSelected] and
+  /// instigate appropriate changes in [_states] and [_controller].
   @override
   void didUpdateWidget(covariant IconicChip oldWidget) {
     super.didUpdateWidget(oldWidget);
+    final Set<MaterialState> toAdd = {};
+    final Set<MaterialState> toRemove = {};
     if (widget.onPressed != oldWidget.onPressed) {
       if (widget.onPressed == null) {
-        states.add(MaterialState.disabled);
+        toAdd.add(MaterialState.disabled);
       } else {
-        states.remove(MaterialState.disabled);
+        toRemove.add(MaterialState.disabled);
       }
     }
     if (widget.isSelected != oldWidget.isSelected) {
       if (widget.isSelected) {
-        states.add(MaterialState.selected);
+        toAdd.add(MaterialState.selected);
         _controller.forward();
       } else {
-        states.remove(MaterialState.selected);
+        toRemove.add(MaterialState.selected);
         _controller.reverse();
       }
+    }
+    if (toAdd.isNotEmpty || toRemove.isNotEmpty) {
+      _stateController.update(toAdd: toAdd, toRemove: toRemove);
     }
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _stateController.dispose();
     super.dispose();
   }
 }
