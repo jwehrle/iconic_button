@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+/// Utility Functions and Classes for ButtonStyles and MaterialStateProperties
+/// based on Material Theme guidelines.
+
 const double kDefaultElevation = 0.0;
 const Size kDefaultSize = Size(45.0, 40);
 const Color kDefaultShadow = Colors.black;
@@ -11,14 +14,7 @@ const OutlinedBorder kDefaultShape = const RoundedRectangleBorder(
 const EdgeInsets kDefaultPadding = EdgeInsets.zero;
 const InteractiveInkFeatureFactory kDefaultSplash = InkRipple.splashFactory;
 
-/// Helper function for creating custom ButtonStyle based on ThemeData where
-/// parameters are not provided.
-///
-/// [primary] (the background of the button) [onPrimary] (the foreground of the
-/// button) [onSurface] (the disabled color) are modified jointly when the
-/// button is selected/unselected or disabled/enabled and should be provided
-/// together or left null.
-///
+/// Returns a [ButtonStyle] suited to [IconicButton]
 ButtonStyle selectableStyleFrom({
   required Color primary,
   required Color onPrimary,
@@ -47,6 +43,7 @@ ButtonStyle selectableStyleFrom({
   );
 }
 
+/// Returns a [ButtonStyle] suited to [ColorButton]
 ButtonStyle colorStyleFrom({
   required Size fixedSize,
   Color? shadowColor,
@@ -69,6 +66,7 @@ ButtonStyle colorStyleFrom({
   );
 }
 
+/// Returns a [ButtonStyle] suited to [IconicChip] and [CardChip]
 ButtonStyle chipStyleFrom({
   required TextStyle textStyle,
   required Color backgroundColor,
@@ -93,6 +91,8 @@ ButtonStyle chipStyleFrom({
   );
 }
 
+/// Returns a [ButtonStyle] suited to Navigation uses of [IconicButton] where
+/// the button content changes but the background does not.
 ButtonStyle navigationStyleFrom({
   required Color primary,
   required Color onPrimary,
@@ -120,6 +120,8 @@ ButtonStyle navigationStyleFrom({
   );
 }
 
+/// Property for foreground that changes based whether selected or disabled
+/// are present.
 @immutable
 class _ForegroundProperty extends MaterialStateProperty<Color?> {
   _ForegroundProperty(
@@ -149,6 +151,8 @@ class _ForegroundProperty extends MaterialStateProperty<Color?> {
   }
 }
 
+/// Property that depends only on selected status and is used for navigation
+/// bar
 @immutable
 class _NavigationForegroundProperty extends MaterialStateProperty<Color?> {
   _NavigationForegroundProperty(this.onPrimary);
@@ -167,6 +171,8 @@ class _NavigationForegroundProperty extends MaterialStateProperty<Color?> {
   }
 }
 
+/// Property for background that changes based whether selected or disabled
+/// are present.
 @immutable
 class _BackgroundProperty extends MaterialStateProperty<Color?> {
   _BackgroundProperty(this.backgroundColor, this.primary);
@@ -187,6 +193,8 @@ class _BackgroundProperty extends MaterialStateProperty<Color?> {
   }
 }
 
+/// Property that flips between [backgroundColor] and [selectedColor] based
+/// on selected state.
 @immutable
 class _ChipBackgroundProperty extends MaterialStateProperty<Color?> {
   final Color? backgroundColor;
@@ -205,6 +213,8 @@ class _ChipBackgroundProperty extends MaterialStateProperty<Color?> {
   }
 }
 
+/// Property that flips between [pressedElevation] and [defaultElevation] based
+/// on selected state.
 @immutable
 class _ChipElevationProperty extends MaterialStateProperty<double?> {
   final double? pressedElevation;
@@ -220,6 +230,8 @@ class _ChipElevationProperty extends MaterialStateProperty<double?> {
   }
 }
 
+/// Property that changes the opacity of primary color based on hovered,
+/// focused, and pressed states.
 @immutable
 class _OverlayProperty extends MaterialStateProperty<Color?> {
   _OverlayProperty(this.primary);
@@ -243,6 +255,7 @@ class _OverlayProperty extends MaterialStateProperty<Color?> {
   }
 }
 
+/// Property that changes elevation based on hovered state
 @immutable
 class _ElevationProperty extends MaterialStateProperty<double?> {
   _ElevationProperty(this.elevation)
@@ -261,6 +274,13 @@ class _ElevationProperty extends MaterialStateProperty<double?> {
   }
 }
 
+/// Helper function for creating custom ButtonStyle based on ThemeData where
+/// parameters are not provided.
+///
+/// [primary] (the background of the button) [onPrimary] (the foreground of the
+/// button) [onSurface] (the disabled color) are modified jointly when the
+/// button is selected/unselected or disabled/enabled and should be provided
+/// together or left null.
 ButtonStyle defaultSelectableStyleOf(BuildContext context) {
   final ThemeData theme = Theme.of(context);
   final ColorScheme colorScheme = theme.colorScheme;

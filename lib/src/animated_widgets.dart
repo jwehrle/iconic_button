@@ -1,37 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:iconic_button/iconic_button.dart';
 
+/// Splash focused wrapper for Material that implicitly animates color and
+/// automatically handles MaterialState changes from interactions like tap,
+/// hover, focus change, etc.
+///
+/// Created because vanilla Material does not automatically handle splash well
+/// when a child is present and vanilla Material doesn't implicitly animate
+/// color changes.
+///
+/// Used in [CardChip], [ColorButton], [IconicButton], [IconicChip]
 class IconicMaterial extends ImplicitlyAnimatedWidget {
-  final Color backgroundColor;
-  final double elevation;
-  final Color shadowColor;
-  final OutlinedBorder shape;
-  final Widget? child;
 
-  final GestureTapCallback? onTap;
-  final ValueChanged<TapDownDetails>? onTapDown;
-  final GestureTapUpCallback? onTapUp;
-  final GestureTapCancelCallback? onTapCancel;
-  final GestureLongPressCallback? onLongPress;
-  final GestureTapCallback? onDoubleTap;
-
-  final MouseCursor? mouseCursor;
-  final ValueChanged<bool>? onHighlightChanged;
-  final ValueChanged<bool>? onHover;
-  final ValueChanged<bool>? onFocusChange;
-  final InteractiveInkFeatureFactory? splashFactory;
-  final Color? focusColor;
-  final Color? highlightColor;
-  final Color? hoverColor;
-  final MaterialStateProperty<Color?>? overlayColor;
-  final Color? splashColor;
-  final bool autoFocus;
-  final FocusNode? focusNode;
-  final BorderRadius? borderRadius;
-  final double? radius;
-  final bool canRequestFocus;
-  final bool enableFeedback;
-  final bool excludeFromSemantics;
-
+  /// Changing [backgroundColor] triggers implicit animation between old
+  /// color and new color.
   IconicMaterial({
     Key? key,
     required this.backgroundColor,
@@ -69,6 +51,37 @@ class IconicMaterial extends ImplicitlyAnimatedWidget {
           curve: curve ?? Curves.linear,
           duration: duration ?? kThemeChangeDuration,
         );
+
+  final Color backgroundColor;
+  final double elevation;
+  final Color shadowColor;
+  final OutlinedBorder shape;
+  final Widget? child;
+
+  final GestureTapCallback? onTap;
+  final ValueChanged<TapDownDetails>? onTapDown;
+  final GestureTapUpCallback? onTapUp;
+  final GestureTapCancelCallback? onTapCancel;
+  final GestureLongPressCallback? onLongPress;
+  final GestureTapCallback? onDoubleTap;
+
+  final MouseCursor? mouseCursor;
+  final ValueChanged<bool>? onHighlightChanged;
+  final ValueChanged<bool>? onHover;
+  final ValueChanged<bool>? onFocusChange;
+  final InteractiveInkFeatureFactory? splashFactory;
+  final Color? focusColor;
+  final Color? highlightColor;
+  final Color? hoverColor;
+  final MaterialStateProperty<Color?>? overlayColor;
+  final Color? splashColor;
+  final bool autoFocus;
+  final FocusNode? focusNode;
+  final BorderRadius? borderRadius;
+  final double? radius;
+  final bool canRequestFocus;
+  final bool enableFeedback;
+  final bool excludeFromSemantics;
 
   @override
   IconicMaterialState createState() => IconicMaterialState();
@@ -124,19 +137,19 @@ class IconicMaterialState extends AnimatedWidgetBaseState<IconicMaterial> {
   }
 }
 
+/// Splash focused wrapper for Material that replaces background color with
+/// a LinearGradient that is implicitly animated and automatically handles
+/// MaterialState changes from interactions like tap, hover, focus change, etc.
+///
+/// Created because vanilla Material does not automatically handle splash well
+/// when a child is present and vanilla Material doesn't use a LinearGradient
+/// background, let alone implicitly animating gradient changes.
+///
+/// Used in [HalfAndHalfColorButton]
 class IconicGradientMaterial extends ImplicitlyAnimatedWidget {
-  final LinearGradient gradient;
-  final double elevation;
-  final Color shadowColor;
-  final OutlinedBorder shape;
-  final Widget? child;
-  final VoidCallback? onTap;
-  final ValueChanged<TapDownDetails>? onTapDown;
-  final VoidCallback? onTapCancel;
-  final ValueChanged<bool>? onHover;
-  final ValueChanged<bool>? onFocusChange;
-  final InteractiveInkFeatureFactory? splashFactory;
 
+  /// Changing [gradient] triggers implicit animation between old  gradient and
+  /// new gradient.
   IconicGradientMaterial({
     Key? key,
     required this.gradient,
@@ -153,10 +166,22 @@ class IconicGradientMaterial extends ImplicitlyAnimatedWidget {
     Curve? curve,
     Duration? duration,
   }) : super(
-          key: key,
-          curve: curve ?? Curves.linear,
-          duration: duration ?? kThemeChangeDuration,
-        );
+    key: key,
+    curve: curve ?? Curves.linear,
+    duration: duration ?? kThemeChangeDuration,
+  );
+
+  final LinearGradient gradient;
+  final double elevation;
+  final Color shadowColor;
+  final OutlinedBorder shape;
+  final Widget? child;
+  final VoidCallback? onTap;
+  final ValueChanged<TapDownDetails>? onTapDown;
+  final VoidCallback? onTapCancel;
+  final ValueChanged<bool>? onHover;
+  final ValueChanged<bool>? onFocusChange;
+  final InteractiveInkFeatureFactory? splashFactory;
 
   @override
   IconicGradientMaterialState createState() => IconicGradientMaterialState();
@@ -170,8 +195,6 @@ class IconicGradientMaterialState
   Widget build(BuildContext context) {
     LinearGradient gradient = _gradientTween!.evaluate(animation)!;
     return Material(
-      // type: MaterialType.card,
-      // color: _color!.evaluate(animation)!,
       elevation: widget.elevation,
       shadowColor: widget.shadowColor,
       shape: widget.shape,
@@ -213,6 +236,10 @@ class LinearGradientTween extends Tween<LinearGradient?> {
   }
 }
 
+/// Icon based widget that optionally displays text. Changes to color are
+/// animated and an optional notification dot can be displayed.
+///
+/// Used in [IconicButton]
 class IconicContent extends ImplicitlyAnimatedWidget {
   final IconData iconData;
   final Size size;
@@ -224,6 +251,7 @@ class IconicContent extends ImplicitlyAnimatedWidget {
   final bool showAlertDot;
   final Color alertDotColor;
 
+  /// Changing [color] triggers animation from old color to new color.
   const IconicContent({
     Key? key,
     required this.iconData,
@@ -259,13 +287,7 @@ class IconicContentState extends AnimatedWidgetBaseState<IconicContent> {
       icon = Stack(
         children: [
           icon,
-          Positioned(
-            child: Icon(
-              Icons.brightness_1,
-              color: widget.alertDotColor,
-              size: 9.0,
-            ),
-          ),
+          Positioned(child: IconDot(dotColor: widget.alertDotColor)),
         ],
       );
     }
@@ -298,5 +320,24 @@ class IconicContentState extends AnimatedWidgetBaseState<IconicContent> {
       widget.color,
       (dynamic value) => ColorTween(begin: value as Color),
     ) as ColorTween?;
+  }
+}
+
+/// Standard notification style dot.
+class IconDot extends StatelessWidget {
+  final Color dotColor;
+  final IconData dotIcon;
+  final double dotSize;
+
+  const IconDot({
+    Key? key,
+    this.dotColor = Colors.red,
+    this.dotIcon = Icons.brightness_1,
+    this.dotSize = 9.0,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Icon(dotIcon, color: dotColor, size: dotSize);
   }
 }
