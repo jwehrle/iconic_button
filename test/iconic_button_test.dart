@@ -3,6 +3,72 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:iconic_button/iconic_button.dart';
 
 main() {
+  testWidgets('IconicButton tap select', (tester) async {
+    ThemeData theme = ThemeData();
+    ButtonController controller = ButtonController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Material(
+          child: IconicButton(
+            controller: controller,
+            iconData: Icons.undo,
+            onPressed: () {},
+            label: 'Test Label',
+          ),
+        ),
+      ),
+    );
+
+    // Check before tap
+    final beforeMaterialFinder = find.byType(IconicMaterial);
+    expect(beforeMaterialFinder, findsOneWidget);
+    final beforeMaterial = tester.widget(beforeMaterialFinder) as IconicMaterial;
+    expect(beforeMaterial.elevation, kDefaultElevation);
+    expect(beforeMaterial.shape, kDefaultShape);
+    expect(beforeMaterial.shadowColor, kDefaultShadow);
+    expect(beforeMaterial.splashFactory, kDefaultSplash);
+    expect(beforeMaterial.backgroundColor, theme.primaryColor);
+    final beforeContentFinder = find.byType(IconicContent);
+    expect(beforeContentFinder, findsOneWidget);
+    final beforeContent = tester.widget(beforeContentFinder) as IconicContent;
+    expect(beforeContent.iconData, Icons.undo);
+    expect(beforeContent.label, 'Test Label');
+    expect(beforeContent.color, theme.colorScheme.onPrimary);
+    expect(beforeContent.shape, kDefaultShape.copyWith(side: BorderSide.none));
+    final expectedStyle = theme.textTheme.bodySmall;
+    expect(beforeContent.textStyle.color, expectedStyle?.color);
+    expect(beforeContent.textStyle.fontFamily, expectedStyle?.fontFamily);
+    expect(beforeContent.textStyle.fontSize, 12.0);
+
+    // Programmatically select
+    controller.select();
+    await tester.pumpAndSettle();
+
+    // After tap
+    final afterMaterialFinder = find.byType(IconicMaterial);
+    expect(afterMaterialFinder, findsOneWidget);
+    final afterMaterial = tester.widget(afterMaterialFinder) as IconicMaterial;
+    expect(afterMaterial.elevation, kDefaultElevation);
+    expect(afterMaterial.shape, kDefaultShape);
+    expect(afterMaterial.shadowColor, kDefaultShadow);
+    expect(afterMaterial.splashFactory, kDefaultSplash);
+    expect(afterMaterial.backgroundColor, theme.colorScheme.onPrimary);
+    final afterContentFinder = find.byType(IconicContent);
+    expect(afterContentFinder, findsOneWidget);
+    final afterContent = tester.widget(afterContentFinder) as IconicContent;
+    expect(afterContent.iconData, Icons.undo);
+    expect(afterContent.label, 'Test Label');
+    expect(afterContent.color, theme.colorScheme.primary);
+    expect(afterContent.shape, kDefaultShape.copyWith(side: BorderSide.none));
+    expect(afterContent.textStyle.color, expectedStyle?.color);
+    expect(afterContent.textStyle.fontFamily, expectedStyle?.fontFamily);
+    expect(afterContent.textStyle.fontSize, 12.0);
+
+    controller.dispose();
+  });
+
   testWidgets('BaseIconicButton tap select', (tester) async {
     ThemeData theme = ThemeData();
 
