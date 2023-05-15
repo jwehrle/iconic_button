@@ -1,7 +1,8 @@
 # iconic_button
 
-A general Material Design style button that requires an icon but has an optional label which is displayed beneath the
-icon.
+An alternative to Flutter ToggleButtons which supports individual button usage without knowing the size of the button 
+and which is focused on icons with optional labels. Additionally, this package exposes a controller to programmatically
+enable, disable, select or unselect buttons without calling setState().
 
 This button uses ButtonStyle, MaterialStates, and InkWell to follow Material Design guidelines and is based loosely on
 the official ElevatedButton in the Flutter platform itself.
@@ -15,7 +16,8 @@ guidelines.
 
 3 Resetable properties: Icon, label, and style can be changed in reaction to your own custom events.
 
-This package was built to serve needs I have found in other projects of mine. I am making it available as I have benefited the hard work of others.
+This package was built to serve needs I have found in other projects of mine. I am making it available publicly as I
+have benefited from the hard work of others.
 
 
 

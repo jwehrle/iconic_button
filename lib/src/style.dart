@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 /// Utility Functions and Classes for ButtonStyles and MaterialStateProperties
 /// based on Material Theme guidelines.
-
+const int kBackgroundAlpha = 0x1f; // 12%
+const int kSelectAlpha = 0x3d; // 12% + 12% = 24%
 const double kDefaultElevation = 0.0;
 const Size kDefaultSize = Size(45.0, 40);
 const Color kDefaultShadow = Colors.black;
@@ -313,13 +314,11 @@ ButtonStyle defaultColorStyleOf(BuildContext context) {
 
 ButtonStyle defaultChipStyleOf(BuildContext context) {
   final ThemeData theme = Theme.of(context);
-  const int backgroundAlpha = 0x1f; // 12%
-  const int selectAlpha = 0x3d; // 12% + 12% = 24%
   return chipStyleFrom(
     textStyle: DefaultTextStyle.of(context).style,
     backgroundColor: theme.chipTheme.backgroundColor ??
-        theme.primaryColor.withAlpha(backgroundAlpha),
+        theme.primaryColor.withAlpha(kBackgroundAlpha),
     selectedColor: theme.chipTheme.selectedColor ??
-        theme.primaryColor.withAlpha(selectAlpha),
+        theme.primaryColor.withAlpha(kSelectAlpha),
   );
 }
