@@ -1,6 +1,6 @@
 name: iconic_button
-description: A new Flutter project.
-version: 0.0.1
+description: Selectable icon based buttons with styling and state management.
+version: 0.0.2
 homepage: "https://github.com/jwehrle/iconic_button"
 
 publish_to: none
