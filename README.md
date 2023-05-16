@@ -20,14 +20,35 @@ Default built-ins for Material and InkWell parameters that make reactive designs
 This package was built to serve needs I have found in other projects of mine. I am making it available publicly as I
 have benefited from the hard work of others.
 
+## Usage
 
-## Getting Started
+    //Import
+    import 'package:iconic_button/iconic_button.dart';
 
-This project is a starting point for a Dart
-[package](https://flutter.dev/developing-packages/),
-a library module containing code that can be shared easily across
-multiple Flutter or Dart projects.
+    // For IconicButton make a controller 
+    final ButtonController controller = ButtonController();
+    
+    // Add listener
+    IconicButton(
+        controller: controller,
+        iconData: Icons.undo,
+        onPressed: () {},
+        label: 'Label',
+    )
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+    // To change the state of the button, use the controller
+    controller.select();
+    controller.unSelect();
+    controller.enable();
+    controller.disable();
+
+    // Remember to dispose just as you would for a ValueNotifier
+    listNotifier.dispose();
+
+## Installing
+
+    flutter pub add iconic_button
+
+## Repository (Github)
+
+[https://github.com/jwehrle/iconic_button.git](https://github.com/jwehrle/iconic_button.git)
