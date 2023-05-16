@@ -3,8 +3,6 @@ description: Selectable icon based buttons with styling and state management.
 version: 0.0.2
 homepage: "https://github.com/jwehrle/iconic_button"
 
-publish_to: none
-
 environment:
   sdk: ">=2.12.0 <3.0.0"
   flutter: ">=1.17.0"
