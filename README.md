@@ -20,6 +20,8 @@ Default built-ins for Material and InkWell parameters that make reactive designs
 This package was built to serve needs I have found in other projects of mine. I am making it available publicly as I
 have benefited from the hard work of others.
 
+![](assets/iconic_button.gif)
+
 ## Usage
 
     //Import
@@ -43,7 +45,9 @@ have benefited from the hard work of others.
     controller.disable();
 
     // Remember to dispose just as you would for a ValueNotifier
-    listNotifier.dispose();
+    controller.dispose();
+
+See example app for more options.
 
 ## Installing
 
