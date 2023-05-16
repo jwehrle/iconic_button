@@ -1,4 +1,4 @@
-## 0.02
+## 0.0.2
 
 * Added unit tests and improved readability of example.
 
