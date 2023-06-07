@@ -1,17 +1,16 @@
 name: iconic_button
 description: Selectable icon based buttons with styling and state management.
-version: 0.0.3
+version: 1.0.0
 homepage: "https://github.com/jwehrle/iconic_button"
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
-  flutter: ">=1.17.0"
+  sdk: ">=2.18.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
-  collection_value_notifier: ^0.0.1
+  collection_value_notifier: ^1.0.0
 
 dev_dependencies:
   flutter_test:

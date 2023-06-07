@@ -1,3 +1,8 @@
+## 1.0.0
+
+* Updated to Flutter 3.10.4 and Dart 3.0.3.
+* Upgraded collection_value_notifier dependency 
+
 ## 0.0.3
 
 * Added a gif of example app to README along with a bit more information.
