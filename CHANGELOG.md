@@ -1,3 +1,7 @@
+## 1.0.1
+
+* Upgraded example Gradle to 7.3.0
+
 ## 1.0.0
 
 * Updated to Flutter 3.10.4 and Dart 3.0.3.
