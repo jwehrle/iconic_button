@@ -57,14 +57,12 @@ class IconicMaterial extends ImplicitlyAnimatedWidget {
   final Color shadowColor;
   final OutlinedBorder shape;
   final Widget? child;
-
   final GestureTapCallback? onTap;
   final ValueChanged<TapDownDetails>? onTapDown;
   final GestureTapUpCallback? onTapUp;
   final GestureTapCancelCallback? onTapCancel;
   final GestureLongPressCallback? onLongPress;
   final GestureTapCallback? onDoubleTap;
-
   final MouseCursor? mouseCursor;
   final ValueChanged<bool>? onHighlightChanged;
   final ValueChanged<bool>? onHover;
@@ -242,10 +240,8 @@ class LinearGradientTween extends Tween<LinearGradient?> {
 /// Used in [IconicButton]
 class IconicContent extends ImplicitlyAnimatedWidget {
   final IconData iconData;
-  final Size size;
-  final OutlinedBorder shape;
   final Color color;
-  final TextStyle textStyle;
+  final TextStyle? textStyle;
   final String? label;
   final EdgeInsetsGeometry? padding;
   final bool showAlertDot;
@@ -255,10 +251,8 @@ class IconicContent extends ImplicitlyAnimatedWidget {
   const IconicContent({
     Key? key,
     required this.iconData,
-    required this.size,
-    required this.shape,
     required this.color,
-    required this.textStyle,
+    this.textStyle,
     this.label,
     this.padding,
     Curve? curve,
@@ -304,7 +298,7 @@ class IconicContentState extends AnimatedWidgetBaseState<IconicContent> {
                   icon,
                   Text(
                     widget.label!,
-                    style: widget.textStyle.copyWith(color: color),
+                    style: widget.textStyle?.copyWith(color: color),
                     maxLines: 1,
                   ),
                 ],

@@ -4,71 +4,155 @@ import 'package:iconic_button/src/animated_widgets.dart';
 import 'package:iconic_button/src/material_state_controller.dart';
 import 'package:iconic_button/src/style.dart';
 
-// const OutlinedBorder _kDefaultShape = RoundedRectangleBorder(
-//   borderRadius: BorderRadius.all(
-//     Radius.circular(4.0),
-//   ),
-// );
+const kDefaultActionPadding = EdgeInsets.all(16.0);
+const kDefaultActionSpacing = 8.0;
+const double kTurnSelected = 0.5;
+const double kTurnUnselected = 0.0;
 
+/// A customizable, fully animated, expanding Card which uses ListTile for
+/// the always-displayed area and a Wrap of actions for the expanding section.
 class CardChip extends StatefulWidget {
-  /// ListTile parameters
+  /// String wrapped in Text for [ListTile.title]
   final String title;
+
+  /// String wrapped in Text for [ListTile.subtitle]
   final String? subtitle;
 
   /// Typically IconicChip
-  final List<Widget>? choices;
-  final IconData? selectedIconData;
-  final IconData? unSelectedIconData;
-  final int maxLines;
-  final TextOverflow textOverflow;
+  final List<Widget> actions;
 
-  /// Optional Padding around the Text(label) widget
-  final EdgeInsetsGeometry? labelPadding;
+  /// Optional [SwitchIcons] used in [ListTile.leading]. Only one leading
+  /// widget is allowed.
+  /// Switches between a selected (or nothing if null) and
+  /// unselected icon based on selection state.
+  final SwitchIcons? leadingSwitch;
+
+  /// Optional [SwitchIcons] used in [ListTile.trailing]. Only one trailing
+  /// widget is allowed.
+  /// Switches between a selected (or nothing if null) and
+  /// unselected icon based on selection state.
+  final SwitchIcons? trailingSwitch;
+
+  /// Optional [IconData] wrapped in [_IconRotator] used in [ListTile.leading].
+  /// Only one leading widget is allowed.
+  /// Rotates the icon 1/2 turn based on selection state: Unselected ==
+  /// Icon rotated 0 turns, Selected == Icon rotated 1/2 turn.
+  final IconData? leadingSpin;
+
+  /// Optional [IconData] wrapped in [_IconRotator] used in [ListTile.trailing].
+  /// Only one trailing widget is allowed.
+  /// Rotates the icon 1/2 turn based on selection state: Unselected ==
+  /// Icon rotated 0 turns, Selected == Icon rotated 1/2 turn.
+  final IconData? trailingSpin;
+
+  /// Optional padding around actions in the extended area of the card.
+  /// Defaults to EdgeInsets.all(16.0)
+  final EdgeInsets? actionPadding;
+
+  /// Optional padding between actions in the extended area of the card.
+  /// Defaults to 8.0
+  final double? actionSpacing;
 
   /// Optional callback providing the current selection state
   final ValueChanged<bool>? onPressed;
 
-  /// Optional styling for this widget. Defaults will be used if null.
-  final ButtonStyle? style;
+  /// If not null, background color to use instead of IconicCardTheme.background
+  final Color? background;
 
-  /// Optional tooltip parameters
+  /// If not null, selected color to use instead of IconicCardTheme.selected
+  final Color? selected;
+
+  /// If not null, foreground color to use instead of IconicCardTheme.foreground
+  final Color? foreground;
+
+  /// If not null, title TextStyle to use instead of IconicCardTheme.titleStyle
+  final TextStyle? titleStyle;
+
+  /// If not null, subtitle TextStyle to use instead of IconicCardTheme.subtitleStyle
+  final TextStyle? subtitleStyle;
+
+  /// If not null, elevation to use instead of IconicCardTheme.pressedElevation
+  final double? pressedElevation;
+
+  /// If not null, elevation to use instead of IconicCardTheme.defaultElevation
+  final double? defaultElevation;
+
+  /// If not null, margin to use instead of IconicCardTheme.margin
+  final EdgeInsetsGeometry? margin;
+
+  /// If not null, shape to use instead of IconicCardTheme.shape
+  final OutlinedBorder? shape;
+
+  /// If not null, duration to use instead of IconicCardTheme.animationDuration
+  final Duration? animationDuration;
+
+  /// If not null, splash to use instead of IconicCardTheme.splashFactory
+  final InteractiveInkFeatureFactory? splashFactory;
+
+  /// Optional Tooltip message
+  /// A Tooltip will be added only if [tooltip] is not null.
   final String? tooltip;
+
+  /// Optional Tooltip offset
+  /// /// A Tooltip will be added only if [tooltip] is not null.
   final double? tooltipOffset;
+
+  /// Optional Tooltip location preference
+  /// /// A Tooltip will be added only if [tooltip] is not null.
   final bool? preferTooltipBelow;
+
+  /// Optional Tooltip wait duration when hovering, default is 2 seconds
+  /// /// A Tooltip will be added only if [tooltip] is not null.
   final Duration waitDuration;
 
-  /// Animation parameters.
-  final Duration? changeDuration;
+  /// Animation duration. Default is [kThemeChangeDuration]
+  final Duration? transitionDuration;
+
+  /// Animation curve. Default is [Curves.linear]
   final Curve? curve;
 
-  /// Selection parameters
+  /// Selection state
   final bool isSelected;
 
-  /// Optional outline color is used when shape is null in style, in which
-  /// case this color is applied to a BorderSide of a StadiumBorder.
-  final Color? outlineColor;
 
+
+  /// Creates a customizable, fully animated, expanding Card which uses ListTile
+  /// for the always-displayed area and a Wrap of actions for the expanding
+  /// section.
   const CardChip({
-    Key? key,
+    super.key,
     required this.title,
-    this.selectedIconData,
-    this.unSelectedIconData,
+    required this.actions,
+    this.leadingSwitch,
+    this.trailingSwitch,
+    this.leadingSpin,
+    this.trailingSpin,
     this.subtitle,
-    this.maxLines = 1,
-    this.textOverflow = TextOverflow.ellipsis,
-    this.choices,
-    this.labelPadding,
     this.onPressed,
-    this.style,
+    this.background,
+    this.selected,
+    this.foreground,
+    this.titleStyle,
+    this.subtitleStyle,
+    this.pressedElevation,
+    this.defaultElevation,
+    this.margin,
+    this.shape,
+    this.animationDuration,
+    this.splashFactory,
+    this.actionPadding,
+    this.actionSpacing,
     this.tooltip,
     this.tooltipOffset,
     this.preferTooltipBelow,
     this.waitDuration = const Duration(seconds: 2),
-    this.changeDuration,
+    this.transitionDuration,
     this.curve,
     this.isSelected = false,
-    this.outlineColor,
-  }) : super(key: key);
+  })  : assert(
+            leadingSwitch == null || leadingSpin == null, "Can only use one"),
+        assert(
+            trailingSwitch == null || trailingSpin == null, "Can only use one");
 
   @override
   State<StatefulWidget> createState() => CardChipState();
@@ -91,7 +175,7 @@ class CardChipState extends State<CardChip>
       states.add(MaterialState.selected);
     }
     _stateController = MaterialStateController(states: states);
-    _duration = widget.changeDuration ?? kThemeChangeDuration;
+    _duration = widget.transitionDuration ?? kThemeChangeDuration;
     _controller = AnimationController(
       vsync: this,
       duration: _duration,
@@ -110,143 +194,108 @@ class CardChipState extends State<CardChip>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    var cardTheme = theme.extension<IconicCardTheme>() ?? IconicCardTheme.of(context);
+    cardTheme = cardTheme.copyWith(
+      background: widget.background,
+      selected: widget.selected,
+      foreground: widget.foreground,
+      titleStyle: widget.titleStyle,
+      subtitleStyle: widget.subtitleStyle,
+      pressedElevation: widget.pressedElevation,
+      defaultElevation: widget.defaultElevation,
+      margin: widget.margin,
+      shape: widget.shape,
+      animationDuration: widget.animationDuration,
+      splashFactory: widget.splashFactory,
+    );
+    final effectiveStyle = cardTheme.style;
+    bool useLeadingSwitch = widget.leadingSwitch != null;
+    bool useTrailingSwitch = widget.trailingSwitch != null;
+    bool useLeadingSpin = widget.leadingSpin != null;
+    bool useTrailingSpin = widget.trailingSpin != null;
     return SetListenableBuilder<MaterialState>(
       valueListenable: _stateController.listenable,
       builder: (context, states, _) {
-        ButtonStyle style = widget.style ?? defaultChipStyleOf(context);
-        TextStyle? textStyle = style.textStyle?.resolve(states);
-        Widget child = Flex(
-          direction: Axis.vertical,
-          clipBehavior: Clip.none,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flex(
-              direction: Axis.horizontal,
-              clipBehavior: Clip.none,
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  widget.title,
-                  style: theme.textTheme.titleMedium!.merge(
-                    textStyle?.copyWith(
-                      color: textStyle.color?.withOpacity(0.87),
-                    ),
-                  ),
-                  maxLines: widget.maxLines,
-                  overflow: widget.textOverflow,
-                ),
-              ],
-            ),
-            if (widget.subtitle != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 4.0),
-                child: Flex(
-                  direction: Axis.horizontal,
-                  clipBehavior: Clip.none,
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.subtitle!,
-                      style: theme.textTheme.bodyMedium!.merge(
-                        textStyle?.copyWith(
-                          color: textStyle.color?.withOpacity(0.73),
-                        ),
-                      ),
-                      maxLines: widget.maxLines,
-                      overflow: widget.textOverflow,
-                    ),
-                  ],
-                ),
-              ),
-            if (widget.choices != null)
-              SizeTransition(
-                sizeFactor: _controller.view,
-                axisAlignment: -1,
-                axis: Axis.vertical,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 4.0),
-                  child: Wrap(
-                    clipBehavior: Clip.none,
-                    spacing: 8.0,
-                    runSpacing: 8.0,
-                    children: widget.choices!,
-                  ),
-                ),
-              ),
-          ],
-        );
-        child = Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: child,
-        );
-        if (widget.selectedIconData != null) {
-          Widget icon;
-          if (widget.unSelectedIconData != null) {
-            icon = Padding(
-              padding: const EdgeInsets.only(left: 16.0, top: 16.0),
-              child: AnimatedSwitcher(
-                duration: _duration,
-                child: states.contains(MaterialState.selected)
-                    ? Icon(
-                        widget.selectedIconData,
-                        key: ValueKey('selected_icon'),
-                        color: textStyle?.color?.withOpacity(0.73),
-                      )
-                    : Icon(
-                        widget.unSelectedIconData,
-                        key: ValueKey('unselected_icon'),
-                        color: textStyle?.color?.withOpacity(0.73),
-                      ),
-              ),
-            );
-          } else {
-            icon = SizeTransition(
-              sizeFactor: _controller.view,
-              axis: Axis.horizontal,
-              axisAlignment: -1,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 16.0, top: 16.0),
-                child: FadeTransition(
-                  opacity: _controller.view,
-                  child: Icon(
-                    widget.selectedIconData,
-                    color: textStyle?.color?.withOpacity(0.73),
-                  ),
-                ),
-              ),
-            );
-          }
-          child = Flex(
-            direction: Axis.horizontal,
-            clipBehavior: Clip.none,
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              icon,
-              Expanded(child: child),
-            ],
+        bool isSelected = states.contains(MaterialState.selected);
+        Widget? leading;
+        if (useLeadingSwitch) {
+          leading = _IconSwitcher(
+            switchIcons: widget.leadingSwitch!,
+            isSelected: isSelected,
+            duration: _duration,
           );
         }
+        if (useLeadingSpin) {
+          leading = _IconRotator(
+            icon: widget.leadingSpin!,
+            isSelected: isSelected,
+            duration: _duration,
+          );
+        }
+        Widget? trailing;
+        if (useTrailingSwitch) {
+          trailing = _IconSwitcher(
+            switchIcons: widget.trailingSwitch!,
+            isSelected: isSelected,
+            duration: _duration,
+          );
+        }
+        if (useTrailingSpin) {
+          trailing = _IconRotator(
+            icon: widget.trailingSpin!,
+            isSelected: isSelected,
+            duration: _duration,
+          );
+        }
+
+        Widget child = _Content(
+          title: widget.title,
+          titleStyle: cardTheme.titleStyle,
+          subtitle: widget.subtitle,
+          subtitleStyle: cardTheme.subtitleStyle,
+          sizeFactor: _controller.view,
+          leading: leading,
+          trailing: trailing,
+          actions: widget.actions,
+          actionPadding: widget.actionPadding,
+          actionSpacing: widget.actionSpacing,
+        );
+        if (widget.tooltip != null) {
+          child = Tooltip(
+            message: widget.tooltip!,
+            verticalOffset: widget.tooltipOffset,
+            preferBelow: widget.preferTooltipBelow,
+            waitDuration: widget.waitDuration,
+            child: child,
+          );
+        }
+        final backColor = effectiveStyle.backgroundColor?.resolve(states);
+        final effectiveBackColor = backColor ?? theme.primaryColor;
+        final shape = effectiveStyle.shape?.resolve(states);
+        final effectiveShape = shape ?? kDefaultCircularShape;
+        final elevation = effectiveStyle.elevation?.resolve(states);
+        final effectiveElevation = elevation ?? kDefaultElevation;
+        final shadow = effectiveStyle.shadowColor?.resolve(states);
+        final effectiveShadow = shadow ?? kDefaultShadow;
+        final splash = effectiveStyle.splashFactory;
+        final effectiveSplash = splash ?? kDefaultSplash;
         final bool isDisabled = states.contains(MaterialState.disabled);
         Widget button = IconicMaterial(
-          backgroundColor:
-              style.backgroundColor?.resolve(states) ?? theme.primaryColor,
-          shape: style.shape?.resolve(states) ?? kDefaultShape,
-          elevation: style.elevation?.resolve(states) ?? kDefaultElevation,
-          shadowColor: style.shadowColor?.resolve(states) ?? kDefaultShadow,
-          splashFactory: style.splashFactory ?? kDefaultSplash,
+          backgroundColor: effectiveBackColor,
+          shape: effectiveShape,
+          elevation: effectiveElevation,
+          shadowColor: effectiveShadow,
+          splashFactory: effectiveSplash,
           onTap: isDisabled ? null : onTap,
           onTapDown: isDisabled ? null : onTapDown,
           onTapCancel: onTapCancel,
           onHover: isDisabled ? null : onHover,
           onFocusChange: isDisabled ? null : onFocusChanged,
-          duration: widget.changeDuration,
+          duration: widget.transitionDuration,
           curve: widget.curve,
           child: child,
         );
-        final padding = style.padding?.resolve(states);
+        final padding = effectiveStyle.padding?.resolve(states);
         if (padding != null) {
           button = Padding(
             padding: padding,
@@ -289,5 +338,144 @@ class CardChipState extends State<CardChip>
     _controller.dispose();
     _stateController.dispose();
     super.dispose();
+  }
+}
+
+/// Content of a [CardChip]. Creates a [Flex] rather than a [Column] in order to
+/// set clipBehavior to [Clip.none]. Children are a [ListTile] for the
+/// always-visible section and a [SizeTransition] of [Wrap] of actions for the
+/// expanding section.
+class _Content extends StatelessWidget {
+  final String title;
+  final TextStyle? titleStyle;
+  final String? subtitle;
+  final TextStyle? subtitleStyle;
+  final Widget? leading;
+  final Widget? trailing;
+  final List<Widget> actions;
+  final Animation<double> sizeFactor;
+  final EdgeInsets? actionPadding;
+  final double? actionSpacing;
+
+  const _Content({
+    Key? key,
+    required this.title,
+    required this.actions,
+    required this.sizeFactor,
+    this.titleStyle,
+    this.subtitle,
+    this.subtitleStyle,
+    this.leading,
+    this.trailing,
+    this.actionPadding,
+    this.actionSpacing,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Flex(
+      direction: Axis.vertical,
+      clipBehavior: Clip.none,
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListTile(
+          leading: leading,
+          title: Text(title),
+          titleTextStyle: titleStyle,
+          subtitle: subtitle != null ? Text(subtitle!) : null,
+          subtitleTextStyle: subtitleStyle,
+          trailing: trailing,
+        ),
+        Flexible(
+          child: SizeTransition(
+            sizeFactor: sizeFactor,
+            axisAlignment: -1,
+            axis: Axis.vertical,
+            child: Padding(
+              padding: actionPadding ?? kDefaultActionPadding,
+              child: Wrap(
+                clipBehavior: Clip.none,
+                spacing: actionSpacing ?? kDefaultActionSpacing,
+                runSpacing: actionSpacing ?? kDefaultActionSpacing,
+                children: actions,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Encapsulation of selected and unselected icons for use in either leading
+/// or trailing sections of a ListTile. Unselected can be null, in which case
+/// the CardChip transitions between no icon and the selected icon based on
+/// selection state.
+class SwitchIcons {
+  final IconData selected;
+  final IconData? unSelected;
+
+  SwitchIcons({this.unSelected, required this.selected});
+}
+
+/// Wrapper for [AnimatedSwitcher] to switch between icons in [SwitchIcons]
+/// based on selection state.
+class _IconSwitcher extends StatelessWidget {
+  final SwitchIcons switchIcons;
+  final bool isSelected;
+  final Duration? duration;
+
+  const _IconSwitcher({
+    Key? key,
+    required this.switchIcons,
+    required this.isSelected,
+    this.duration,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final selIcon = Icon(
+      switchIcons.selected,
+      key: ValueKey('selected_icon'),
+    );
+    final unSelIcon = Icon(
+      switchIcons.unSelected,
+      key: ValueKey('unselected_icon'),
+    );
+    return SizedBox.fromSize(
+      size: Size.square(Theme.of(context).iconTheme.size ?? 24.0),
+      child: AnimatedSwitcher(
+        duration: duration ?? kThemeAnimationDuration,
+        child: isSelected ? selIcon : unSelIcon,
+      ),
+    );
+  }
+}
+
+/// Wrapper for [AnimatedRotation] to rotate [icon] based on selection state.
+class _IconRotator extends StatelessWidget {
+  final IconData icon;
+  final bool isSelected;
+  final Duration? duration;
+
+  const _IconRotator({
+    Key? key,
+    required this.icon,
+    required this.isSelected,
+    this.duration,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.fromSize(
+      size: Size.square(Theme.of(context).iconTheme.size ?? 24.0),
+      child: AnimatedRotation(
+        turns: isSelected ? kTurnSelected : kTurnUnselected,
+        duration: duration ?? kThemeAnimationDuration,
+        child: Icon(icon),
+      ),
+    );
   }
 }

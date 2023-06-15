@@ -4,45 +4,127 @@ import 'package:iconic_button/src/style.dart';
 import 'package:iconic_button/src/material_state_controller.dart';
 import 'package:collection_value_notifier/collection_value_notifier.dart';
 
+/// Stops for [HalfAndHalfColorButton] gradient. Creates a sharp, vertical,
+/// 1/2 split.
 const List<double> _kHalfStops = [0.0, 0.5, 0.5];
 
-class ColorButton extends StatefulWidget {
-  final Color color;
+abstract class _ColorButtonBase extends StatefulWidget {
+  /// Callback when this button is pressed.
   final VoidCallback? onPressed;
-  final ButtonStyle? style;
+
+  /// Optional tooltip for this button. If not null, widget is wrapped in a
+  /// Tooltip.
   final String? tooltip;
+
+  /// Optional offset of optional Tooltip, see [tooltip]
   final double? tooltipOffset;
+
+  /// Optional location preference of optional Tooltip, see [tooltip]
   final bool? preferTooltipBelow;
+
+  /// Optional wait duration of optional Tooltip, see [tooltip]
   final Duration waitDuration;
-  final Duration? changeDuration;
+
+  /// Curve for implicit animations - default is Curves.linear
   final Curve? curve;
+
+  /// Whether the icon of this button should be shown both when selected and
+  /// unselected.
   final bool usePersistentIcon;
+
+  /// Whether this button should behave as a toggle (when selectable is true)
+  /// or as a non-toggle button (when selectable is false), default is true.
   final bool selectable;
+
+  /// Whether this button is selected
   final bool isSelected;
+
+  /// Color for the icon of this button
   final Color iconColor;
+
+  /// IconData of icon of this button
   final IconData iconData;
 
-  const ColorButton({
-    Key? key,
-    required this.color,
+  /// Optional shadowColor will replace ColorButtonTheme.shadowColor if not null
+  /// /// See [ColorButtonTheme] for defaults
+  final Color? shadowColor;
+
+  /// Optional elevation will replace ColorButtonTheme.elevation if not null
+  /// /// See [ColorButtonTheme] for defaults
+  final double? elevation;
+
+  /// Optional size of avatar will replace ColorButtonTheme.fixedSize if not null
+  /// /// See [ColorButtonTheme] for defaults
+  final Size? fixedSize;
+
+  /// Optional shape of button will replace ColorButtonTheme.shape if not null
+  /// /// See [ColorButtonTheme] for defaults
+  final OutlinedBorder? shape;
+
+  /// Optional implicit animation duration replaces ColorButtonTheme.animationDuration if not null
+  /// /// See [ColorButtonTheme] for defaults
+  final Duration? animationDuration;
+
+  /// Optional splash factory replaces ColorButtonTheme.splashFactory if not null
+  /// See [ColorButtonTheme] for defaults
+  final InteractiveInkFeatureFactory? splashFactory;
+
+  /// Abstract base class for [ColorButton] and [HalfAndHalfColorButton].
+  /// Encapsulates common member fields.
+  const _ColorButtonBase({
+    super.key,
+    required this.iconData,
+    required this.iconColor,
+    required this.isSelected,
+    required this.selectable,
+    required this.waitDuration,
+    required this.usePersistentIcon,
     this.onPressed,
-    this.style,
     this.tooltip,
     this.tooltipOffset,
     this.preferTooltipBelow,
-    this.waitDuration = const Duration(seconds: 2),
-    this.changeDuration,
     this.curve,
-    this.usePersistentIcon = false,
-    this.selectable = false,
-    this.isSelected = false,
-    this.iconColor = Colors.white,
-    this.iconData = Icons.check,
+    this.shadowColor,
+    this.elevation,
+    this.fixedSize,
+    this.shape,
+    this.animationDuration,
+    this.splashFactory,
+  });
+}
+
+/// A toggle button with a color background and an optional icon which can be
+/// shown all the time or only when selected.
+class ColorButton extends _ColorButtonBase {
+  /// The color this color button shows.
+  final Color color;
+
+  /// Creates a toggle button with a color background and an optional icon
+  /// which can be shown all the time or only when selected.
+  const ColorButton({
+    super.key,
+    required this.color,
+    super.onPressed,
+    super.tooltip,
+    super.tooltipOffset,
+    super.preferTooltipBelow,
+    super.waitDuration = const Duration(seconds: 2),
+    super.curve,
+    super.usePersistentIcon = false,
+    super.selectable = true,
+    super.isSelected = false,
+    super.iconColor = Colors.white,
+    super.iconData = Icons.check,
+    super.shadowColor,
+    super.elevation,
+    super.fixedSize,
+    super.shape,
+    super.animationDuration,
+    super.splashFactory,
   })  : assert(
             !usePersistentIcon || !selectable,
             'ColorButton cannot both persistently show an icon AND show an icon'
-            ' only when button is selected.'),
-        super(key: key);
+            ' only when button is selected.');
 
   @override
   State<StatefulWidget> createState() => ColorButtonState();
@@ -71,41 +153,58 @@ class ColorButtonState extends State<ColorButton>
 
   @override
   Widget build(BuildContext context) {
-    final ButtonStyle style = widget.style ?? defaultColorStyleOf(context);
+    var colorTheme = Theme.of(context).extension<ColorButtonTheme>() ??
+        ColorButtonTheme.of(context);
+    colorTheme = colorTheme.copyWith(
+      shadowColor: widget.shadowColor,
+      elevation: widget.elevation,
+      fixedSize: widget.fixedSize,
+      shape: widget.shape,
+      animationDuration: widget.animationDuration,
+      splashFactory: widget.splashFactory,
+    );
+    final effectiveStyle = colorTheme.style;
     return SetListenableBuilder<MaterialState>(
       valueListenable: _stateController.listenable,
       builder: (context, states, _) {
-        final shape = style.shape?.resolve(states) ?? kDefaultShape;
+        final shape = effectiveStyle.shape?.resolve(states);
+        final effectiveShape = shape ?? kDefaultCircularShape;
+        final elevation = effectiveStyle.elevation?.resolve(states);
+        final effectiveElevation = elevation ?? kDefaultElevation;
+        final shadow = effectiveStyle.shadowColor?.resolve(states);
+        final effectiveShadow = shadow ?? kDefaultShadow;
+        final splash = effectiveStyle.splashFactory;
+        final effectiveSplash = splash ?? kDefaultSplash;
         final bool isDisabled = states.contains(MaterialState.disabled);
+        final bool isSelected = states.contains(MaterialState.selected);
         final icon = Icon(widget.iconData, color: widget.iconColor);
-        final selIcon = states.contains(MaterialState.selected) ? icon : null;
-        final child = widget.usePersistentIcon
-            ? icon
-            : widget.selectable
-                ? AnimatedContainer(
-                    duration: widget.changeDuration ?? kThemeChangeDuration,
-                    child: selIcon,
-                  )
-                : null;
         Widget button = IconicMaterial(
           backgroundColor: widget.color,
-          shape: shape,
-          elevation: style.elevation?.resolve(states) ?? kDefaultElevation,
-          shadowColor: style.shadowColor?.resolve(states) ?? kDefaultShadow,
-          splashFactory: style.splashFactory ?? kDefaultSplash,
+          shape: effectiveShape,
+          elevation: effectiveElevation,
+          shadowColor: effectiveShadow,
+          splashFactory: effectiveSplash,
           onTap: isDisabled ? null : onTap,
           onTapDown: isDisabled ? null : onTapDown,
           onTapCancel: onTapCancel,
           onHover: isDisabled ? null : onHover,
           onFocusChange: isDisabled ? null : onFocusChanged,
-          duration: widget.changeDuration,
+          duration: effectiveStyle.animationDuration,
           curve: widget.curve,
-          child: child,
+          child: widget.usePersistentIcon
+              ? icon
+              : widget.selectable
+                  ? AnimatedContainer(
+                      duration: effectiveStyle.animationDuration ??
+                          kThemeChangeDuration,
+                      child: isSelected ? icon : null,
+                    )
+                  : null,
         );
-        Size size = style.fixedSize?.resolve(states) ?? kDefaultSize;
-        button = SizedBox(
-          width: size.width,
-          height: size.height,
+        final size = effectiveStyle.fixedSize?.resolve(states);
+        final effectiveSize = size ?? kDefaultCircularSize;
+        button = SizedBox.fromSize(
+          size: effectiveSize,
           child: button,
         );
         if (widget.tooltip != null) {
@@ -151,47 +250,45 @@ class ColorButtonState extends State<ColorButton>
   }
 }
 
-class HalfAndHalfColorButton extends StatefulWidget {
+/// A toggle button with a two-color background and an optional icon which can
+/// be shown all the time or only when selected. Good for a dynamic option
+/// such as when a color will change depending on app brightness.
+class HalfAndHalfColorButton extends _ColorButtonBase {
   final Color startColor;
   final Color endColor;
-  final VoidCallback? onPressed;
-  final ButtonStyle? style;
-  final String? tooltip;
-  final double? tooltipOffset;
-  final bool? preferTooltipBelow;
-  final Duration waitDuration;
-  final Duration? changeDuration;
-  final Curve? curve;
-  final bool usePersistentIcon;
-  final bool selectable;
-  final bool isSelected;
   final Color iconStartColor;
   final Color iconEndColor;
-  final IconData iconData;
 
+  /// Creates a toggle button with a two-color background and an optional icon
+  /// which can be shown all the time or only when selected. Good for a dynamic
+  /// option such as when a color will change depending on app brightness.
   const HalfAndHalfColorButton({
-    Key? key,
+    super.key,
     required this.startColor,
     required this.endColor,
-    this.onPressed,
-    this.style,
-    this.tooltip,
-    this.tooltipOffset,
-    this.preferTooltipBelow,
-    this.waitDuration = const Duration(seconds: 2),
-    this.changeDuration,
-    this.curve,
-    this.usePersistentIcon = false,
-    this.selectable = false,
-    this.isSelected = false,
     this.iconStartColor = Colors.black,
     this.iconEndColor = Colors.white,
-    this.iconData = Icons.check,
+    super.onPressed,
+    super.tooltip,
+    super.tooltipOffset,
+    super.preferTooltipBelow,
+    super.waitDuration = const Duration(seconds: 2),
+    super.curve,
+    super.usePersistentIcon = false,
+    super.selectable = true,
+    super.isSelected = false,
+    super.iconColor = Colors.white,
+    super.iconData = Icons.check,
+    super.shadowColor,
+    super.elevation,
+    super.fixedSize,
+    super.shape,
+    super.animationDuration,
+    super.splashFactory,
   })  : assert(
             !usePersistentIcon || !selectable,
             'ColorButton cannot both persistently show an icon AND show an icon'
-            ' only when button is selected.'),
-        super(key: key);
+            ' only when button is selected.');
 
   @override
   State<StatefulWidget> createState() => HalfAndHalfColorButtonState();
@@ -220,24 +317,44 @@ class HalfAndHalfColorButtonState extends State<HalfAndHalfColorButton>
 
   @override
   Widget build(BuildContext context) {
-    final ButtonStyle style = widget.style ?? defaultColorStyleOf(context);
+    var colorTheme = Theme.of(context).extension<ColorButtonTheme>() ??
+        ColorButtonTheme.of(context);
+    colorTheme = colorTheme.copyWith(
+      shadowColor: widget.shadowColor,
+      elevation: widget.elevation,
+      fixedSize: widget.fixedSize,
+      shape: widget.shape,
+      animationDuration: widget.animationDuration,
+      splashFactory: widget.splashFactory,
+    );
+    final effectiveStyle = colorTheme.style;
     return SetListenableBuilder<MaterialState>(
       valueListenable: _stateController.listenable,
       builder: (context, states, _) {
-        final shape = style.shape?.resolve(states) ?? kDefaultShape;
-        final bool isDisabled = states.contains(MaterialState.disabled);
+        final shape = effectiveStyle.shape?.resolve(states);
+        final effectiveShape = shape ?? kDefaultRectangularShape;
+        final elevation = effectiveStyle.elevation?.resolve(states);
+        final effectiveElevation = elevation ?? kDefaultElevation;
+        final shadow = effectiveStyle.shadowColor?.resolve(states);
+        final effectiveShadow = shadow ?? kDefaultShadow;
+        final splash = effectiveStyle.splashFactory;
+        final effectiveSplash = splash ?? kDefaultSplash;
+        final size = effectiveStyle.fixedSize?.resolve(states);
+        final effectiveSize = size ?? kDefaultCircularSize;
+        final isSelected = states.contains(MaterialState.selected);
+        final isDisabled = states.contains(MaterialState.disabled);
         final icon = HalfAndHalfIcon(
           iconData: widget.iconData,
           startColor: widget.iconStartColor,
           endColor: widget.iconEndColor,
         );
-        final selIcon = states.contains(MaterialState.selected) ? icon : null;
         final child = widget.usePersistentIcon
             ? icon
             : widget.selectable
                 ? AnimatedContainer(
-                    duration: widget.changeDuration ?? kThemeChangeDuration,
-                    child: selIcon,
+                    duration: effectiveStyle.animationDuration ??
+                        kThemeChangeDuration,
+                    child: isSelected ? icon : null,
                   )
                 : null;
         final colors = <Color>[
@@ -247,23 +364,21 @@ class HalfAndHalfColorButtonState extends State<HalfAndHalfColorButton>
         ];
         Widget button = IconicGradientMaterial(
           gradient: LinearGradient(stops: _kHalfStops, colors: colors),
-          shape: shape,
-          elevation: style.elevation?.resolve(states) ?? kDefaultElevation,
-          shadowColor: style.shadowColor?.resolve(states) ?? kDefaultShadow,
-          splashFactory: style.splashFactory ?? kDefaultSplash,
+          shape: effectiveShape,
+          elevation: effectiveElevation,
+          shadowColor: effectiveShadow,
+          splashFactory: effectiveSplash,
           onTap: isDisabled ? null : onTap,
           onTapDown: isDisabled ? null : onTapDown,
           onTapCancel: onTapCancel,
           onHover: isDisabled ? null : onHover,
           onFocusChange: isDisabled ? null : onFocusChanged,
-          duration: widget.changeDuration,
+          duration: effectiveStyle.animationDuration,
           curve: widget.curve,
           child: child,
         );
-        Size size = style.fixedSize?.resolve(states) ?? kDefaultSize;
-        button = SizedBox(
-          width: size.width,
-          height: size.height,
+        button = SizedBox.fromSize(
+          size: effectiveSize,
           child: button,
         );
         if (widget.tooltip != null) {
@@ -310,6 +425,7 @@ class HalfAndHalfColorButtonState extends State<HalfAndHalfColorButton>
   }
 }
 
+/// An icon that displays in two colors for use with [HalfAndHalfColorButton]
 class HalfAndHalfIcon extends StatelessWidget {
   final IconData iconData;
   final Color startColor;

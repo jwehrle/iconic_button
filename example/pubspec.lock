@@ -98,7 +98,7 @@ packages:
     source: hosted
     version: "1.17.1"
   collection_value_notifier:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: collection_value_notifier
       sha256: "647fc439cc1ecf566d528389ac98485ed875bdd89d4b9069db7b248baa88d100"
@@ -193,7 +193,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.0.0"
+    version: "1.0.1"
   js:
     dependency: transitive
     description:

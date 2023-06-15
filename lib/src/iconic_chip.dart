@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:iconic_button/iconic_button.dart';
 import 'package:iconic_button/src/material_state_controller.dart';
 
-const Size kDefaultAvatarSize = Size(32.0, 32.0);
-
 /// A Button based on the standard Chip but which maintains a state,
 /// [isSelected] which enables more complex behavior such as avatar widgets
 /// that change based on selection status, visual changes based on
@@ -20,8 +18,20 @@ class IconicChip extends StatefulWidget {
     this.onPressed,
     this.onLongPress,
     this.avatar,
+    this.background,
+    this.selected,
+    this.foreground,
+    this.outline,
+    this.padding,
+    this.labelStyle,
     this.labelPadding,
-    this.style,
+    this.pressedElevation,
+    this.defaultElevation,
+    this.fixedSize,
+    this.shape,
+    this.animationDuration,
+    this.splashFactory,
+    // this.style,
     this.tooltip,
     this.tooltipOffset,
     this.preferTooltipBelow,
@@ -50,9 +60,6 @@ class IconicChip extends StatefulWidget {
   /// How to handle text overflow, defaults to [TextOverflow.ellipsis]
   final TextOverflow textOverflow;
 
-  /// Optional Padding around the Text(label) widget
-  final EdgeInsetsGeometry? labelPadding;
-
   /// Optional callback providing the current selection state. Defines whether
   /// chip state is [MaterialState.disabled] or not (null == disabled).
   final ValueChanged<bool>? onPressed;
@@ -61,7 +68,24 @@ class IconicChip extends StatefulWidget {
   final VoidCallback? onLongPress;
 
   /// Optional styling for this widget. Defaults will be used if null.
-  final ButtonStyle? style;
+  // final ButtonStyle? style;
+
+  final Color? background;
+  final Color? selected;
+  final Color? foreground;
+  final Color? outline;
+  final TextStyle? labelStyle;
+
+  /// Optional Padding around the Text(label) widget
+  final EdgeInsetsGeometry? labelPadding;
+
+  final Size? fixedSize;
+  final double? pressedElevation;
+  final double? defaultElevation;
+  final EdgeInsetsGeometry? padding;
+  final OutlinedBorder? shape;
+  final Duration? animationDuration;
+  final InteractiveInkFeatureFactory? splashFactory;
 
   /// Optional tooltip
   final String? tooltip;
@@ -133,7 +157,7 @@ class IconicChipState extends State<IconicChip>
     initStateDetector(
       controller: _stateController,
       onSelect: widget.onPressed,
-      selectable: widget.selectable,
+      isSelectable: widget.selectable,
       animateForward: _controller.forward,
       animateReverse: _controller.reverse,
     );
@@ -141,36 +165,54 @@ class IconicChipState extends State<IconicChip>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    var chipTheme = theme.extension<IconicChipTheme>() ??
+        IconicChipTheme.of(context);
+    chipTheme = chipTheme.copyWith(
+      background: widget.background,
+      selected: widget.selected,
+      foreground: widget.foreground,
+      outline: widget.outline,
+      padding: widget.padding,
+      labelStyle: widget.labelStyle,
+      labelPadding: widget.labelPadding,
+      pressedElevation: widget.pressedElevation,
+      defaultElevation: widget.defaultElevation,
+      fixedSize: widget.fixedSize,
+      shape: widget.shape,
+      animationDuration: widget.animationDuration,
+      splashFactory: widget.splashFactory,
+    );
+    final effectiveStyle = chipTheme.style;
     return SetListenableBuilder<MaterialState>(
       valueListenable: _stateController.listenable,
       builder: (context, states, _) {
-        final effectiveStyle = widget.style ?? defaultChipStyleOf(context);
-
-        final textStyle = effectiveStyle.textStyle?.resolve(states);
+        final effectiveTextStyle = effectiveStyle.textStyle?.resolve(states);
 
         // Build up chip in stages
         Widget child = Text(
           widget.label,
-          style: textStyle,
+          style: effectiveTextStyle,
           maxLines: widget.maxLines,
           overflow: widget.textOverflow,
         );
 
-        if (widget.labelPadding != null) {
-          child = Padding(
-            padding: widget.labelPadding!,
-            child: child,
-          );
-        }
-
-        final icon = Center(
-          child: Icon(widget.iconData,
-              color: widget.iconColor ?? textStyle?.color),
+        child = Padding(
+          padding: chipTheme.labelPadding ?? const EdgeInsets.all(4.0),
+          child: child,
         );
 
-        final effectiveSize =
-            effectiveStyle.fixedSize?.resolve(states) ?? kDefaultAvatarSize;
+        final effectiveIconColor =
+            widget.iconColor ?? effectiveTextStyle?.color;
+        final icon = Center(
+          child: Icon(
+            widget.iconData,
+            color: effectiveIconColor,
+          ),
+        );
 
+        final size = effectiveStyle.fixedSize?.resolve(states);
+        final effectiveSize = size ?? kDefaultAvatarSize;
         if (widget.usePersistentIcon) {
           child = Row(
             mainAxisSize: MainAxisSize.min,
@@ -230,33 +272,37 @@ class IconicChipState extends State<IconicChip>
 
         final padding = effectiveStyle.padding?.resolve(states);
 
-        if (padding != null) {
-          child = Padding(
-            padding: padding,
-            child: child,
-          );
-        }
+        child = Padding(
+          padding: padding ?? const EdgeInsets.all(4.0),
+          child: child,
+        );
 
+        final backColor = effectiveStyle.backgroundColor?.resolve(states);
+        final effectiveBackColor = backColor ?? theme.primaryColor;
+        final shape = effectiveStyle.shape?.resolve(states);
+        final defaultShape = widget.outlineColor != null
+            ? StadiumBorder(side: BorderSide(color: widget.outlineColor!))
+            : StadiumBorder();
+        final effectiveShape = shape ?? defaultShape;
+        final elevation = effectiveStyle.elevation?.resolve(states);
+        final effectiveElevation = elevation ?? kDefaultElevation;
+        final shadow = effectiveStyle.shadowColor?.resolve(states);
+        final effectiveShadow = shadow ?? kDefaultShadow;
+        final splash = effectiveStyle.splashFactory;
+        final effectiveSplash = splash ?? kDefaultSplash;
         final isDisabled = states.contains(MaterialState.disabled);
-
         Widget button = IconicMaterial(
-          backgroundColor: effectiveStyle.backgroundColor?.resolve(states) ??
-              Theme.of(context).primaryColor,
-          shape: effectiveStyle.shape?.resolve(states) ??
-              (widget.outlineColor != null
-                  ? StadiumBorder(side: BorderSide(color: widget.outlineColor!))
-                  : StadiumBorder()),
-          elevation:
-              effectiveStyle.elevation?.resolve(states) ?? kDefaultElevation,
-          shadowColor:
-              effectiveStyle.shadowColor?.resolve(states) ?? kDefaultShadow,
-          splashFactory: effectiveStyle.splashFactory ?? kDefaultSplash,
+          backgroundColor: effectiveBackColor,
+          shape: effectiveShape,
+          elevation: effectiveElevation,
+          shadowColor: effectiveShadow,
+          splashFactory: effectiveSplash,
           onTap: isDisabled ? null : onTap,
-          onLongPress: widget.onLongPress,
           onTapDown: isDisabled ? null : onTapDown,
           onTapCancel: onTapCancel,
           onHover: isDisabled ? null : onHover,
           onFocusChange: isDisabled ? null : onFocusChanged,
+          onLongPress: widget.onLongPress,
           duration: widget.changeDuration,
           curve: widget.curve,
           child: child,

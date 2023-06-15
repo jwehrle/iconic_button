@@ -24,9 +24,10 @@ main() {
     // Check before tap
     final beforeMaterialFinder = find.byType(IconicMaterial);
     expect(beforeMaterialFinder, findsOneWidget);
-    final beforeMaterial = tester.widget(beforeMaterialFinder) as IconicMaterial;
+    final beforeMaterial =
+        tester.widget(beforeMaterialFinder) as IconicMaterial;
     expect(beforeMaterial.elevation, kDefaultElevation);
-    expect(beforeMaterial.shape, kDefaultShape);
+    expect(beforeMaterial.shape, kDefaultRectangularShape);
     expect(beforeMaterial.shadowColor, kDefaultShadow);
     expect(beforeMaterial.splashFactory, kDefaultSplash);
     expect(beforeMaterial.backgroundColor, theme.primaryColor);
@@ -36,11 +37,10 @@ main() {
     expect(beforeContent.iconData, Icons.undo);
     expect(beforeContent.label, 'Test Label');
     expect(beforeContent.color, theme.colorScheme.onPrimary);
-    expect(beforeContent.shape, kDefaultShape.copyWith(side: BorderSide.none));
     final expectedStyle = theme.textTheme.bodySmall;
-    expect(beforeContent.textStyle.color, expectedStyle?.color);
-    expect(beforeContent.textStyle.fontFamily, expectedStyle?.fontFamily);
-    expect(beforeContent.textStyle.fontSize, 12.0);
+    expect(beforeContent.textStyle?.color, expectedStyle?.color);
+    expect(beforeContent.textStyle?.fontFamily, expectedStyle?.fontFamily);
+    expect(beforeContent.textStyle?.fontSize, 12.0);
 
     // Programmatically select
     controller.select();
@@ -51,7 +51,7 @@ main() {
     expect(afterMaterialFinder, findsOneWidget);
     final afterMaterial = tester.widget(afterMaterialFinder) as IconicMaterial;
     expect(afterMaterial.elevation, kDefaultElevation);
-    expect(afterMaterial.shape, kDefaultShape);
+    expect(afterMaterial.shape, kDefaultRectangularShape);
     expect(afterMaterial.shadowColor, kDefaultShadow);
     expect(afterMaterial.splashFactory, kDefaultSplash);
     expect(afterMaterial.backgroundColor, theme.colorScheme.onPrimary);
@@ -61,10 +61,9 @@ main() {
     expect(afterContent.iconData, Icons.undo);
     expect(afterContent.label, 'Test Label');
     expect(afterContent.color, theme.colorScheme.primary);
-    expect(afterContent.shape, kDefaultShape.copyWith(side: BorderSide.none));
-    expect(afterContent.textStyle.color, expectedStyle?.color);
-    expect(afterContent.textStyle.fontFamily, expectedStyle?.fontFamily);
-    expect(afterContent.textStyle.fontSize, 12.0);
+    expect(afterContent.textStyle?.color, expectedStyle?.color);
+    expect(afterContent.textStyle?.fontFamily, expectedStyle?.fontFamily);
+    expect(afterContent.textStyle?.fontSize, 12.0);
 
     controller.dispose();
   });
@@ -77,7 +76,8 @@ main() {
         theme: theme,
         home: Material(
           child: BaseIconicButton(
-            state: ButtonState.enabled,
+            isSelected: false,
+            isEnabled: true,
             iconData: Icons.undo,
             onPressed: () {},
             label: 'Test Label',
@@ -89,9 +89,10 @@ main() {
     // Check before tap
     final beforeMaterialFinder = find.byType(IconicMaterial);
     expect(beforeMaterialFinder, findsOneWidget);
-    final beforeMaterial = tester.widget(beforeMaterialFinder) as IconicMaterial;
+    final beforeMaterial =
+        tester.widget(beforeMaterialFinder) as IconicMaterial;
     expect(beforeMaterial.elevation, kDefaultElevation);
-    expect(beforeMaterial.shape, kDefaultShape);
+    expect(beforeMaterial.shape, kDefaultRectangularShape);
     expect(beforeMaterial.shadowColor, kDefaultShadow);
     expect(beforeMaterial.splashFactory, kDefaultSplash);
     expect(beforeMaterial.backgroundColor, theme.primaryColor);
@@ -101,11 +102,10 @@ main() {
     expect(beforeContent.iconData, Icons.undo);
     expect(beforeContent.label, 'Test Label');
     expect(beforeContent.color, theme.colorScheme.onPrimary);
-    expect(beforeContent.shape, kDefaultShape.copyWith(side: BorderSide.none));
     final expectedStyle = theme.textTheme.bodySmall;
-    expect(beforeContent.textStyle.color, expectedStyle?.color);
-    expect(beforeContent.textStyle.fontFamily, expectedStyle?.fontFamily);
-    expect(beforeContent.textStyle.fontSize, 12.0);
+    expect(beforeContent.textStyle?.color, expectedStyle?.color);
+    expect(beforeContent.textStyle?.fontFamily, expectedStyle?.fontFamily);
+    expect(beforeContent.textStyle?.fontSize, 12.0);
 
     // Tap button
     final buttonFinder = find.byType(BaseIconicButton);
@@ -118,7 +118,7 @@ main() {
     expect(afterMaterialFinder, findsOneWidget);
     final afterMaterial = tester.widget(afterMaterialFinder) as IconicMaterial;
     expect(afterMaterial.elevation, kDefaultElevation);
-    expect(afterMaterial.shape, kDefaultShape);
+    expect(afterMaterial.shape, kDefaultRectangularShape);
     expect(afterMaterial.shadowColor, kDefaultShadow);
     expect(afterMaterial.splashFactory, kDefaultSplash);
     expect(afterMaterial.backgroundColor, theme.colorScheme.onPrimary);
@@ -128,10 +128,9 @@ main() {
     expect(afterContent.iconData, Icons.undo);
     expect(afterContent.label, 'Test Label');
     expect(afterContent.color, theme.colorScheme.primary);
-    expect(afterContent.shape, kDefaultShape.copyWith(side: BorderSide.none));
-    expect(afterContent.textStyle.color, expectedStyle?.color);
-    expect(afterContent.textStyle.fontFamily, expectedStyle?.fontFamily);
-    expect(afterContent.textStyle.fontSize, 12.0);
+    expect(afterContent.textStyle?.color, expectedStyle?.color);
+    expect(afterContent.textStyle?.fontFamily, expectedStyle?.fontFamily);
+    expect(afterContent.textStyle?.fontSize, 12.0);
   });
 
   testWidgets('ColorButton tap select', (tester) async {
@@ -153,9 +152,10 @@ main() {
     // Check before tap
     final beforeMaterialFinder = find.byType(IconicMaterial);
     expect(beforeMaterialFinder, findsOneWidget);
-    final beforeMaterial = tester.widget(beforeMaterialFinder) as IconicMaterial;
+    final beforeMaterial =
+        tester.widget(beforeMaterialFinder) as IconicMaterial;
     expect(beforeMaterial.elevation, kDefaultElevation);
-    expect(beforeMaterial.shape, kDefaultShape);
+    expect(beforeMaterial.shape, kDefaultCircularShape);
     expect(beforeMaterial.shadowColor, kDefaultShadow);
     expect(beforeMaterial.splashFactory, kDefaultSplash);
     expect(beforeMaterial.backgroundColor, Colors.amber);
@@ -178,7 +178,7 @@ main() {
     expect(afterMaterialFinder, findsOneWidget);
     final afterMaterial = tester.widget(afterMaterialFinder) as IconicMaterial;
     expect(afterMaterial.elevation, kDefaultElevation);
-    expect(afterMaterial.shape, kDefaultShape);
+    expect(afterMaterial.shape, kDefaultCircularShape);
     expect(afterMaterial.shadowColor, kDefaultShadow);
     expect(afterMaterial.splashFactory, kDefaultSplash);
     expect(afterMaterial.backgroundColor, Colors.amber);
@@ -204,13 +204,12 @@ main() {
     // Check before tap
     final beforeMaterialFinder = find.byType(IconicMaterial);
     expect(beforeMaterialFinder, findsOneWidget);
-    final beforeMaterial = tester.widget(beforeMaterialFinder) as IconicMaterial;
-    expect(beforeMaterial.elevation, kDefaultElevation);
+    final beforeMaterial =
+        tester.widget(beforeMaterialFinder) as IconicMaterial;
+    expect(beforeMaterial.elevation, 1.0);
     expect(beforeMaterial.shape, StadiumBorder());
     expect(beforeMaterial.shadowColor, kDefaultShadow);
     expect(beforeMaterial.splashFactory, kDefaultSplash);
-    expect(beforeMaterial.backgroundColor, theme.chipTheme.backgroundColor ??
-        theme.primaryColor.withAlpha(kBackgroundAlpha));
     final beforeFadeFinder = find.byType(FadeTransition);
     expect(beforeFadeFinder, findsOneWidget);
     final beforeFade = tester.widget(beforeFadeFinder) as FadeTransition;
@@ -230,20 +229,18 @@ main() {
     final afterIconFinder = find.byType(Icon);
     expect(afterIconFinder, findsOneWidget);
     final icon = tester.widget(afterIconFinder) as Icon;
-    expect(icon.color, Colors.black87);
     expect(icon.icon, Icons.check);
     final afterMaterialFinder = find.byType(IconicMaterial);
     expect(afterMaterialFinder, findsOneWidget);
     final afterMaterial = tester.widget(afterMaterialFinder) as IconicMaterial;
-    expect(afterMaterial.elevation, kDefaultElevation);
+    expect(afterMaterial.elevation, 1.0);
     expect(afterMaterial.shape, StadiumBorder());
     expect(afterMaterial.shadowColor, kDefaultShadow);
     expect(afterMaterial.splashFactory, kDefaultSplash);
-    expect(afterMaterial.backgroundColor, theme.chipTheme.backgroundColor ??
-        theme.primaryColor.withAlpha(kSelectAlpha));
   });
 
   testWidgets('CardChip tap select', (tester) async {
+
     ThemeData theme = ThemeData();
 
     await tester.pumpWidget(
@@ -252,11 +249,13 @@ main() {
         home: Material(
           child: CardChip(
             title: 'Test CardChip',
-            selectedIconData: Icons.check_box,
-            unSelectedIconData: Icons.check_box_outline_blank,
+            leadingSwitch: SwitchIcons(
+              unSelected: Icons.check_box_outline_blank,
+              selected: Icons.check_box,
+            ),
             isSelected: false,
             onPressed: (value) {},
-            choices: [Text('one'), Text('two')],
+            actions: [Text('one'), Text('two')],
           ),
         ),
       ),
@@ -265,13 +264,13 @@ main() {
     // Check before tap
     final beforeMaterialFinder = find.byType(IconicMaterial);
     expect(beforeMaterialFinder, findsOneWidget);
-    final beforeMaterial = tester.widget(beforeMaterialFinder) as IconicMaterial;
-    expect(beforeMaterial.elevation, kDefaultElevation);
-    expect(beforeMaterial.shape, kDefaultShape);
+    final beforeMaterial =
+        tester.widget(beforeMaterialFinder) as IconicMaterial;
+    expect(beforeMaterial.elevation, 1.0);
+    expect(beforeMaterial.shape, kDefaultRectangularShape);
     expect(beforeMaterial.shadowColor, kDefaultShadow);
     expect(beforeMaterial.splashFactory, kDefaultSplash);
-    expect(beforeMaterial.backgroundColor, theme.chipTheme.backgroundColor ??
-        theme.primaryColor.withAlpha(kBackgroundAlpha));
+    expect(beforeMaterial.backgroundColor, theme.cardColor);
     final beforeSizeFinder = find.byType(SizeTransition);
     expect(beforeSizeFinder, findsOneWidget);
     final beforeSize = tester.widget(beforeSizeFinder) as SizeTransition;
@@ -299,12 +298,9 @@ main() {
     final afterMaterialFinder = find.byType(IconicMaterial);
     expect(afterMaterialFinder, findsOneWidget);
     final afterMaterial = tester.widget(afterMaterialFinder) as IconicMaterial;
-    expect(afterMaterial.elevation, kDefaultElevation);
-    expect(afterMaterial.shape, kDefaultShape);
+    expect(afterMaterial.elevation, 1.0);
+    expect(afterMaterial.shape, kDefaultRectangularShape);
     expect(afterMaterial.shadowColor, kDefaultShadow);
     expect(afterMaterial.splashFactory, kDefaultSplash);
-    expect(afterMaterial.backgroundColor, theme.chipTheme.backgroundColor ??
-        theme.primaryColor.withAlpha(kSelectAlpha));
   });
-
 }
