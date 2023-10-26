@@ -1,3 +1,7 @@
+## 1.3.0
+
+* Added optional overriding ButtonStyle parameter to button constructors.
+
 ## 1.2.0
 
 * Upgraded to Flutter 3.10.5 and Dart 3.0.5
