@@ -19,7 +19,16 @@ const OutlinedBorder kDefaultRectangularShape = const RoundedRectangleBorder(
 );
 const OutlinedBorder kDefaultCircularShape = const CircleBorder();
 const InteractiveInkFeatureFactory kDefaultSplash = InkRipple.splashFactory;
-
+const EdgeInsets kDefaultLabelPadding = const EdgeInsets.all(4.0);
+const EdgeInsets kDefaultIconicChipPadding = const EdgeInsets.all(4.0);
+const kDefaultActionPadding = EdgeInsets.all(16.0);
+const kDefaultActionSpacing = 8.0;
+const double kTurnSelected = 0.5;
+const double kTurnUnselected = 0.0;
+const double kDefaultIconSize = 24.0;
+/// Stops for [HalfAndHalfColorButton] gradient. Creates a sharp, vertical,
+/// 1/2 split.
+const List<double> kHalfStops = [0.0, 0.5, 0.5];
 
 /// Property for foreground that changes based whether selected or disabled
 /// are present.

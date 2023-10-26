@@ -1,17 +1,54 @@
 import 'package:collection_value_notifier/collection_value_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:iconic_button/src/animated_widgets.dart';
+import 'package:iconic_button/src/icon_rotator.dart';
+import 'package:iconic_button/src/icon_switcher.dart';
 import 'package:iconic_button/src/material_state_controller.dart';
 import 'package:iconic_button/src/style.dart';
-
-const kDefaultActionPadding = EdgeInsets.all(16.0);
-const kDefaultActionSpacing = 8.0;
-const double kTurnSelected = 0.5;
-const double kTurnUnselected = 0.0;
 
 /// A customizable, fully animated, expanding Card which uses ListTile for
 /// the always-displayed area and a Wrap of actions for the expanding section.
 class CardChip extends StatefulWidget {
+
+  /// Creates a customizable, fully animated, expanding Card which uses ListTile
+  /// for the always-displayed area and a Wrap of actions for the expanding
+  /// section.
+  const CardChip({
+    super.key,
+    required this.title,
+    required this.actions,
+    this.leadingSwitch,
+    this.trailingSwitch,
+    this.leadingSpin,
+    this.trailingSpin,
+    this.subtitle,
+    this.onPressed,
+    this.background,
+    this.selected,
+    this.foreground,
+    this.titleStyle,
+    this.subtitleStyle,
+    this.pressedElevation,
+    this.defaultElevation,
+    this.margin,
+    this.shape,
+    this.animationDuration,
+    this.splashFactory,
+    this.actionPadding,
+    this.actionSpacing,
+    this.tooltip,
+    this.tooltipOffset,
+    this.preferTooltipBelow,
+    this.waitDuration = const Duration(seconds: 2),
+    this.transitionDuration,
+    this.curve,
+    this.isSelected = false,
+    this.style,
+  })  : assert(
+            leadingSwitch == null || leadingSpin == null, "Can only use one"),
+        assert(
+            trailingSwitch == null || trailingSpin == null, "Can only use one");
+
   /// String wrapped in Text for [ListTile.title]
   final String title;
 
@@ -33,13 +70,13 @@ class CardChip extends StatefulWidget {
   /// unselected icon based on selection state.
   final SwitchIcons? trailingSwitch;
 
-  /// Optional [IconData] wrapped in [_IconRotator] used in [ListTile.leading].
+  /// Optional [IconData] wrapped in [IconRotator] used in [ListTile.leading].
   /// Only one leading widget is allowed.
   /// Rotates the icon 1/2 turn based on selection state: Unselected ==
   /// Icon rotated 0 turns, Selected == Icon rotated 1/2 turn.
   final IconData? leadingSpin;
 
-  /// Optional [IconData] wrapped in [_IconRotator] used in [ListTile.trailing].
+  /// Optional [IconData] wrapped in [IconRotator] used in [ListTile.trailing].
   /// Only one trailing widget is allowed.
   /// Rotates the icon 1/2 turn based on selection state: Unselected ==
   /// Icon rotated 0 turns, Selected == Icon rotated 1/2 turn.
@@ -114,45 +151,8 @@ class CardChip extends StatefulWidget {
   /// Selection state
   final bool isSelected;
 
-
-
-  /// Creates a customizable, fully animated, expanding Card which uses ListTile
-  /// for the always-displayed area and a Wrap of actions for the expanding
-  /// section.
-  const CardChip({
-    super.key,
-    required this.title,
-    required this.actions,
-    this.leadingSwitch,
-    this.trailingSwitch,
-    this.leadingSpin,
-    this.trailingSpin,
-    this.subtitle,
-    this.onPressed,
-    this.background,
-    this.selected,
-    this.foreground,
-    this.titleStyle,
-    this.subtitleStyle,
-    this.pressedElevation,
-    this.defaultElevation,
-    this.margin,
-    this.shape,
-    this.animationDuration,
-    this.splashFactory,
-    this.actionPadding,
-    this.actionSpacing,
-    this.tooltip,
-    this.tooltipOffset,
-    this.preferTooltipBelow,
-    this.waitDuration = const Duration(seconds: 2),
-    this.transitionDuration,
-    this.curve,
-    this.isSelected = false,
-  })  : assert(
-            leadingSwitch == null || leadingSpin == null, "Can only use one"),
-        assert(
-            trailingSwitch == null || trailingSpin == null, "Can only use one");
+  /// Optional ButtonStyle overrides style from theme
+  final ButtonStyle? style;
 
   @override
   State<StatefulWidget> createState() => CardChipState();
@@ -194,7 +194,8 @@ class CardChipState extends State<CardChip>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    var cardTheme = theme.extension<IconicCardTheme>() ?? IconicCardTheme.of(context);
+    var cardTheme =
+        theme.extension<IconicCardTheme>() ?? IconicCardTheme.of(context);
     cardTheme = cardTheme.copyWith(
       background: widget.background,
       selected: widget.selected,
@@ -208,7 +209,7 @@ class CardChipState extends State<CardChip>
       animationDuration: widget.animationDuration,
       splashFactory: widget.splashFactory,
     );
-    final effectiveStyle = cardTheme.style;
+    final effectiveStyle = widget.style ?? cardTheme.style;
     bool useLeadingSwitch = widget.leadingSwitch != null;
     bool useTrailingSwitch = widget.trailingSwitch != null;
     bool useLeadingSpin = widget.leadingSpin != null;
@@ -219,14 +220,14 @@ class CardChipState extends State<CardChip>
         bool isSelected = states.contains(MaterialState.selected);
         Widget? leading;
         if (useLeadingSwitch) {
-          leading = _IconSwitcher(
+          leading = IconSwitcher(
             switchIcons: widget.leadingSwitch!,
             isSelected: isSelected,
             duration: _duration,
           );
         }
         if (useLeadingSpin) {
-          leading = _IconRotator(
+          leading = IconRotator(
             icon: widget.leadingSpin!,
             isSelected: isSelected,
             duration: _duration,
@@ -234,14 +235,14 @@ class CardChipState extends State<CardChip>
         }
         Widget? trailing;
         if (useTrailingSwitch) {
-          trailing = _IconSwitcher(
+          trailing = IconSwitcher(
             switchIcons: widget.trailingSwitch!,
             isSelected: isSelected,
             duration: _duration,
           );
         }
         if (useTrailingSpin) {
-          trailing = _IconRotator(
+          trailing = IconRotator(
             icon: widget.trailingSpin!,
             isSelected: isSelected,
             duration: _duration,
@@ -405,77 +406,6 @@ class _Content extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-/// Encapsulation of selected and unselected icons for use in either leading
-/// or trailing sections of a ListTile. Unselected can be null, in which case
-/// the CardChip transitions between no icon and the selected icon based on
-/// selection state.
-class SwitchIcons {
-  final IconData selected;
-  final IconData? unSelected;
-
-  SwitchIcons({this.unSelected, required this.selected});
-}
-
-/// Wrapper for [AnimatedSwitcher] to switch between icons in [SwitchIcons]
-/// based on selection state.
-class _IconSwitcher extends StatelessWidget {
-  final SwitchIcons switchIcons;
-  final bool isSelected;
-  final Duration? duration;
-
-  const _IconSwitcher({
-    Key? key,
-    required this.switchIcons,
-    required this.isSelected,
-    this.duration,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final selIcon = Icon(
-      switchIcons.selected,
-      key: ValueKey('selected_icon'),
-    );
-    final unSelIcon = Icon(
-      switchIcons.unSelected,
-      key: ValueKey('unselected_icon'),
-    );
-    return SizedBox.fromSize(
-      size: Size.square(Theme.of(context).iconTheme.size ?? 24.0),
-      child: AnimatedSwitcher(
-        duration: duration ?? kThemeAnimationDuration,
-        child: isSelected ? selIcon : unSelIcon,
-      ),
-    );
-  }
-}
-
-/// Wrapper for [AnimatedRotation] to rotate [icon] based on selection state.
-class _IconRotator extends StatelessWidget {
-  final IconData icon;
-  final bool isSelected;
-  final Duration? duration;
-
-  const _IconRotator({
-    Key? key,
-    required this.icon,
-    required this.isSelected,
-    this.duration,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox.fromSize(
-      size: Size.square(Theme.of(context).iconTheme.size ?? 24.0),
-      child: AnimatedRotation(
-        turns: isSelected ? kTurnSelected : kTurnUnselected,
-        duration: duration ?? kThemeAnimationDuration,
-        child: Icon(icon),
-      ),
     );
   }
 }

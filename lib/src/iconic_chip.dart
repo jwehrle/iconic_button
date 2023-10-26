@@ -31,7 +31,7 @@ class IconicChip extends StatefulWidget {
     this.shape,
     this.animationDuration,
     this.splashFactory,
-    // this.style,
+    this.style,
     this.tooltip,
     this.tooltipOffset,
     this.preferTooltipBelow,
@@ -68,23 +68,45 @@ class IconicChip extends StatefulWidget {
   final VoidCallback? onLongPress;
 
   /// Optional styling for this widget. Defaults will be used if null.
-  // final ButtonStyle? style;
+  final ButtonStyle? style;
 
+  /// Optional unselected background color, defaults to theme
   final Color? background;
+
+  /// Optional selected background color, defaults to theme
   final Color? selected;
+
+  /// Optional forground color, defaults to theme
   final Color? foreground;
+
+  /// Optional outline color, defaults to theme
   final Color? outline;
+
+  /// Optional label style, defaults to theme
   final TextStyle? labelStyle;
 
   /// Optional Padding around the Text(label) widget
   final EdgeInsetsGeometry? labelPadding;
 
+  /// Optional size
   final Size? fixedSize;
+
+  /// Optional pressed elevation
   final double? pressedElevation;
+
+  /// Optional default elevation
   final double? defaultElevation;
+
+  /// Optional chip padding
   final EdgeInsetsGeometry? padding;
+
+  /// Optional shape, defaults to Stadium
   final OutlinedBorder? shape;
+
+  /// Optional animation duration, defaults to theme default
   final Duration? animationDuration;
+
+  /// Optional splash factory, defaults to theme default
   final InteractiveInkFeatureFactory? splashFactory;
 
   /// Optional tooltip
@@ -183,7 +205,7 @@ class IconicChipState extends State<IconicChip>
       animationDuration: widget.animationDuration,
       splashFactory: widget.splashFactory,
     );
-    final effectiveStyle = chipTheme.style;
+    final effectiveStyle = widget.style ?? chipTheme.style;
     return SetListenableBuilder<MaterialState>(
       valueListenable: _stateController.listenable,
       builder: (context, states, _) {
@@ -198,7 +220,7 @@ class IconicChipState extends State<IconicChip>
         );
 
         child = Padding(
-          padding: chipTheme.labelPadding ?? const EdgeInsets.all(4.0),
+          padding: chipTheme.labelPadding ?? kDefaultLabelPadding,
           child: child,
         );
 
@@ -270,10 +292,8 @@ class IconicChipState extends State<IconicChip>
           );
         }
 
-        final padding = effectiveStyle.padding?.resolve(states);
-
         child = Padding(
-          padding: padding ?? const EdgeInsets.all(4.0),
+          padding: effectiveStyle.padding?.resolve(states) ?? kDefaultIconicChipPadding,
           child: child,
         );
 

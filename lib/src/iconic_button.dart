@@ -24,6 +24,8 @@ class IconicButton extends StatelessWidget {
     this.curve,
     this.showAlertDot = false,
     this.alertDotColor = Colors.red,
+    this.style,
+    this.useNavigationStyle = false,
     this.primary,
     this.onPrimary,
     this.onSurface,
@@ -75,6 +77,22 @@ class IconicButton extends StatelessWidget {
 
   /// The color of the optional alert dot. Defaults to [Colors.red]
   final Color alertDotColor;
+
+  /// Optional style of this button. If provided, the non-null fields of this
+  /// style are preferred over inherited IconicButtonTheme and any other
+  /// style-related parameters provided in this constructor. Practically
+  /// speaking, if you provide [style] don't bother providing [primary],
+  /// [onPrimary], [onSurface], [shadowColor], [elevation], [shape],
+  /// [textStyle], [padding], [animationDuration], or [splashFactory]
+  final ButtonStyle? style;
+
+  /// Whether to use the [IconicButtonTheme] getter for a navigation focused
+  /// ButtonStyle. The navigation focus here refers to button styles expected
+  /// in navigation bars.
+  /// Since this parameter is only used in the event that a ButtonStyle is
+  /// derived from an inherited IconicButtonTheme, it is ignored when [style]
+  /// is provided.
+  final bool useNavigationStyle;
 
   /// The foreground color when selected and background color when unselected.
   final Color? primary;
@@ -135,6 +153,8 @@ class IconicButton extends StatelessWidget {
           curve: curve,
           showAlertDot: showAlertDot,
           alertDotColor: alertDotColor,
+          style: style,
+          useNavigationStyle: useNavigationStyle,
           primary: primary,
           onPrimary: onPrimary,
           onSurface: onSurface,
@@ -172,6 +192,8 @@ class BaseIconicButton extends StatefulWidget {
     this.curve,
     this.showAlertDot = false,
     this.alertDotColor = Colors.red,
+    this.style,
+    this.useNavigationStyle = false,
     this.primary,
     this.onPrimary,
     this.onSurface,
@@ -219,9 +241,6 @@ class BaseIconicButton extends StatefulWidget {
   /// Hover wait duration before showing tooltip. Default is 2 seconds.
   final Duration waitDuration;
 
-  /// Duration of changes to this button. Default is 200 milliseconds.
-  // final Duration? changeDuration;
-
   /// Curve of animated changes to this button. Default is linear.
   final Curve? curve;
 
@@ -230,6 +249,22 @@ class BaseIconicButton extends StatefulWidget {
 
   /// The color to use with an alert dot
   final Color alertDotColor;
+
+  /// Optional style of this button. If provided, the non-null fields of this
+  /// style are preferred over inherited IconicButtonTheme and any other
+  /// style-related parameters provided in this constructor. Practically
+  /// speaking, if you provide [style] don't bother providing [primary],
+  /// [onPrimary], [onSurface], [shadowColor], [elevation], [shape],
+  /// [textStyle], [padding], [animationDuration], or [splashFactory]
+  final ButtonStyle? style;
+
+  /// Whether to use the [IconicButtonTheme] getter for a navigation focused
+  /// ButtonStyle. The navigation focus here refers to button styles expected
+  /// in navigation bars.
+  /// Since this parameter is only used in the event that a ButtonStyle is
+  /// derived from an inherited IconicButtonTheme, it is ignored when [style]
+  /// is provided.
+  final bool useNavigationStyle;
 
   /// The foreground color when selected and background color when unselected.
   final Color? primary;
@@ -298,21 +333,28 @@ class BaseIconicButtonState extends State<BaseIconicButton>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    var buttonTheme =
-        theme.extension<IconicButtonTheme>() ?? IconicButtonTheme.of(context);
-    buttonTheme = buttonTheme.copyWith(
-      primary: widget.primary,
-      onPrimary: widget.onPrimary,
-      onSurface: widget.onSurface,
-      shadowColor: widget.shadowColor,
-      elevation: widget.elevation,
-      textStyle: widget.textStyle,
-      padding: widget.padding,
-      shape: widget.shape,
-      animationDuration: widget.animationDuration,
-      splashFactory: widget.splashFactory,
-    );
-    final effectiveStyle = buttonTheme.style;
+    final effectiveStyle;
+    if (widget.style != null) {
+      effectiveStyle = widget.style;
+    } else {
+      var buttonTheme =
+          theme.extension<IconicButtonTheme>() ?? IconicButtonTheme.of(context);
+      buttonTheme = buttonTheme.copyWith(
+        primary: widget.primary,
+        onPrimary: widget.onPrimary,
+        onSurface: widget.onSurface,
+        shadowColor: widget.shadowColor,
+        elevation: widget.elevation,
+        textStyle: widget.textStyle,
+        padding: widget.padding,
+        shape: widget.shape,
+        animationDuration: widget.animationDuration,
+        splashFactory: widget.splashFactory,
+      );
+      effectiveStyle = widget.useNavigationStyle
+          ? buttonTheme.navigationStyle
+          : buttonTheme.style;
+    }
     return SetListenableBuilder<MaterialState>(
       valueListenable: _stateController.listenable,
       builder: (context, states, _) {

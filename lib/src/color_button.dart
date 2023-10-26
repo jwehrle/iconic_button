@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:iconic_button/src/animated_widgets.dart';
+import 'package:iconic_button/src/half_and_half_icon.dart';
 import 'package:iconic_button/src/style.dart';
 import 'package:iconic_button/src/material_state_controller.dart';
 import 'package:collection_value_notifier/collection_value_notifier.dart';
 
-/// Stops for [HalfAndHalfColorButton] gradient. Creates a sharp, vertical,
-/// 1/2 split.
-const List<double> _kHalfStops = [0.0, 0.5, 0.5];
-
-abstract class _ColorButtonBase extends StatefulWidget {
+/// Base for both ColorButton and HalfAndHalfColorButton
+abstract class ColorButtonBase extends StatefulWidget {
   /// Callback when this button is pressed.
   final VoidCallback? onPressed;
 
@@ -69,9 +67,11 @@ abstract class _ColorButtonBase extends StatefulWidget {
   /// See [ColorButtonTheme] for defaults
   final InteractiveInkFeatureFactory? splashFactory;
 
+  final ButtonStyle? style;
+
   /// Abstract base class for [ColorButton] and [HalfAndHalfColorButton].
   /// Encapsulates common member fields.
-  const _ColorButtonBase({
+  const ColorButtonBase({
     super.key,
     required this.iconData,
     required this.iconColor,
@@ -90,14 +90,13 @@ abstract class _ColorButtonBase extends StatefulWidget {
     this.shape,
     this.animationDuration,
     this.splashFactory,
+    this.style,
   });
 }
 
 /// A toggle button with a color background and an optional icon which can be
 /// shown all the time or only when selected.
-class ColorButton extends _ColorButtonBase {
-  /// The color this color button shows.
-  final Color color;
+class ColorButton extends ColorButtonBase {
 
   /// Creates a toggle button with a color background and an optional icon
   /// which can be shown all the time or only when selected.
@@ -121,10 +120,14 @@ class ColorButton extends _ColorButtonBase {
     super.shape,
     super.animationDuration,
     super.splashFactory,
-  })  : assert(
+    super.style,
+  }) : assert(
             !usePersistentIcon || !selectable,
             'ColorButton cannot both persistently show an icon AND show an icon'
             ' only when button is selected.');
+
+  /// The color this color button shows.
+  final Color color;
 
   @override
   State<StatefulWidget> createState() => ColorButtonState();
@@ -155,15 +158,20 @@ class ColorButtonState extends State<ColorButton>
   Widget build(BuildContext context) {
     var colorTheme = Theme.of(context).extension<ColorButtonTheme>() ??
         ColorButtonTheme.of(context);
-    colorTheme = colorTheme.copyWith(
-      shadowColor: widget.shadowColor,
-      elevation: widget.elevation,
-      fixedSize: widget.fixedSize,
-      shape: widget.shape,
-      animationDuration: widget.animationDuration,
-      splashFactory: widget.splashFactory,
-    );
-    final effectiveStyle = colorTheme.style;
+    final effectiveStyle;
+    if (widget.style != null) {
+      effectiveStyle = widget.style;
+    } else {
+      colorTheme = colorTheme.copyWith(
+        shadowColor: widget.shadowColor,
+        elevation: widget.elevation,
+        fixedSize: widget.fixedSize,
+        shape: widget.shape,
+        animationDuration: widget.animationDuration,
+        splashFactory: widget.splashFactory,
+      );
+      effectiveStyle = colorTheme.style;
+    }
     return SetListenableBuilder<MaterialState>(
       valueListenable: _stateController.listenable,
       builder: (context, states, _) {
@@ -253,12 +261,8 @@ class ColorButtonState extends State<ColorButton>
 /// A toggle button with a two-color background and an optional icon which can
 /// be shown all the time or only when selected. Good for a dynamic option
 /// such as when a color will change depending on app brightness.
-class HalfAndHalfColorButton extends _ColorButtonBase {
-  final Color startColor;
-  final Color endColor;
-  final Color iconStartColor;
-  final Color iconEndColor;
-
+class HalfAndHalfColorButton extends ColorButtonBase {
+  
   /// Creates a toggle button with a two-color background and an optional icon
   /// which can be shown all the time or only when selected. Good for a dynamic
   /// option such as when a color will change depending on app brightness.
@@ -285,10 +289,23 @@ class HalfAndHalfColorButton extends _ColorButtonBase {
     super.shape,
     super.animationDuration,
     super.splashFactory,
-  })  : assert(
+    super.style,
+  }) : assert(
             !usePersistentIcon || !selectable,
             'ColorButton cannot both persistently show an icon AND show an icon'
             ' only when button is selected.');
+
+  /// Color of left half of background
+  final Color startColor;
+
+  /// Color of right half of background
+  final Color endColor;
+
+  /// Color of left half of forground
+  final Color iconStartColor;
+
+  /// Color of right half of foreground
+  final Color iconEndColor;
 
   @override
   State<StatefulWidget> createState() => HalfAndHalfColorButtonState();
@@ -317,17 +334,22 @@ class HalfAndHalfColorButtonState extends State<HalfAndHalfColorButton>
 
   @override
   Widget build(BuildContext context) {
-    var colorTheme = Theme.of(context).extension<ColorButtonTheme>() ??
-        ColorButtonTheme.of(context);
-    colorTheme = colorTheme.copyWith(
-      shadowColor: widget.shadowColor,
-      elevation: widget.elevation,
-      fixedSize: widget.fixedSize,
-      shape: widget.shape,
-      animationDuration: widget.animationDuration,
-      splashFactory: widget.splashFactory,
-    );
-    final effectiveStyle = colorTheme.style;
+    final ButtonStyle effectiveStyle;
+    if (widget.style != null) {
+      effectiveStyle = widget.style!;
+    } else {
+      ColorButtonTheme colorTheme = Theme.of(context).extension<ColorButtonTheme>() ??
+          ColorButtonTheme.of(context);
+      colorTheme = colorTheme.copyWith(
+        shadowColor: widget.shadowColor,
+        elevation: widget.elevation,
+        fixedSize: widget.fixedSize,
+        shape: widget.shape,
+        animationDuration: widget.animationDuration,
+        splashFactory: widget.splashFactory,
+      );
+      effectiveStyle = colorTheme.style;
+    }
     return SetListenableBuilder<MaterialState>(
       valueListenable: _stateController.listenable,
       builder: (context, states, _) {
@@ -363,7 +385,7 @@ class HalfAndHalfColorButtonState extends State<HalfAndHalfColorButton>
           widget.endColor,
         ];
         Widget button = IconicGradientMaterial(
-          gradient: LinearGradient(stops: _kHalfStops, colors: colors),
+          gradient: LinearGradient(stops: kHalfStops, colors: colors),
           shape: effectiveShape,
           elevation: effectiveElevation,
           shadowColor: effectiveShadow,
@@ -422,32 +444,5 @@ class HalfAndHalfColorButtonState extends State<HalfAndHalfColorButton>
   void dispose() {
     _stateController.dispose();
     super.dispose();
-  }
-}
-
-/// An icon that displays in two colors for use with [HalfAndHalfColorButton]
-class HalfAndHalfIcon extends StatelessWidget {
-  final IconData iconData;
-  final Color startColor;
-  final Color endColor;
-
-  HalfAndHalfIcon({
-    required this.iconData,
-    required this.startColor,
-    required this.endColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ShaderMask(
-      blendMode: BlendMode.srcATop,
-      shaderCallback: (Rect rect) {
-        return LinearGradient(
-          stops: _kHalfStops,
-          colors: [startColor, startColor, startColor.withOpacity(0)],
-        ).createShader(rect);
-      },
-      child: Icon(iconData, color: endColor),
-    );
   }
 }
