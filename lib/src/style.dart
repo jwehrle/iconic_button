@@ -30,6 +30,113 @@ const double kDefaultIconSize = 24.0;
 /// 1/2 split.
 const List<double> kHalfStops = [0.0, 0.5, 0.5];
 
+/// Returns a [ButtonStyle] suited to [IconicButton]
+ButtonStyle selectableStyleFrom({
+  required Color primary,
+  required Color onPrimary,
+  required Color onSurface,
+  Color? shadowColor,
+  double elevation = 0.0,
+  TextStyle? textStyle,
+  EdgeInsetsGeometry? padding,
+  Size? fixedSize,
+  OutlinedBorder? shape,
+  Duration? animationDuration,
+  InteractiveInkFeatureFactory? splashFactory,
+}) {
+  return ButtonStyle(
+    backgroundColor: _BackgroundProperty(primary, onPrimary),
+    foregroundColor: _ForegroundProperty(onPrimary, onSurface, primary),
+    overlayColor: _OverlayProperty(primary),
+    elevation: _ElevationProperty(elevation),
+    animationDuration: animationDuration,
+    splashFactory: splashFactory,
+    shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
+    textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),
+    padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
+    fixedSize: ButtonStyleButton.allOrNull<Size>(fixedSize),
+    shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
+  );
+}
+
+/// Returns a [ButtonStyle] suited to [ColorButton]
+ButtonStyle colorStyleFrom({
+  required Size fixedSize,
+  Color? shadowColor,
+  double elevation = 0.0,
+  TextStyle? textStyle,
+  EdgeInsetsGeometry? padding,
+  OutlinedBorder? shape,
+  Duration? animationDuration,
+  InteractiveInkFeatureFactory? splashFactory,
+}) {
+  return ButtonStyle(
+    elevation: _ElevationProperty(elevation),
+    animationDuration: animationDuration,
+    splashFactory: splashFactory,
+    shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
+    textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),
+    padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
+    fixedSize: ButtonStyleButton.allOrNull<Size>(fixedSize),
+    shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
+  );
+}
+
+/// Returns a [ButtonStyle] suited to [IconicChip] and [CardChip]
+ButtonStyle chipStyleFrom({
+  required TextStyle textStyle,
+  required Color backgroundColor,
+  required Color selectedColor,
+  Size? fixedSize,
+  double pressedElevation = 6.0,
+  double defaultElevation = 0.0,
+  EdgeInsetsGeometry? padding,
+  OutlinedBorder? shape,
+  Duration? animationDuration,
+  InteractiveInkFeatureFactory? splashFactory,
+}) {
+  return ButtonStyle(
+    backgroundColor: _ChipBackgroundProperty(selectedColor, backgroundColor),
+    elevation: _ChipElevationProperty(pressedElevation, defaultElevation),
+    animationDuration: animationDuration,
+    splashFactory: splashFactory,
+    textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),
+    padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
+    fixedSize: ButtonStyleButton.allOrNull<Size>(fixedSize),
+    shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
+  );
+}
+
+/// Returns a [ButtonStyle] suited to Navigation uses of [IconicButton] where
+/// the button content changes but the background does not.
+ButtonStyle navigationStyleFrom({
+  required Color primary,
+  required Color onPrimary,
+  Color? onSurface,
+  Color? shadowColor,
+  TextStyle? textStyle,
+  EdgeInsetsGeometry? padding,
+  Size? fixedSize,
+  OutlinedBorder? shape,
+  Duration? animationDuration,
+  InteractiveInkFeatureFactory? splashFactory,
+}) {
+  return ButtonStyle(
+    backgroundColor: ButtonStyleButton.allOrNull<Color>(primary),
+    foregroundColor: _NavigationForegroundProperty(onPrimary),
+    overlayColor: _OverlayProperty(primary),
+    elevation: ButtonStyleButton.allOrNull<double>(0.0),
+    animationDuration: animationDuration,
+    splashFactory: splashFactory,
+    shadowColor: ButtonStyleButton.allOrNull<Color>(shadowColor),
+    textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),
+    padding: ButtonStyleButton.allOrNull<EdgeInsetsGeometry>(padding),
+    fixedSize: ButtonStyleButton.allOrNull<Size>(fixedSize),
+    shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
+  );
+}
+
+
 /// Property for foreground that changes based whether selected or disabled
 /// are present.
 @immutable

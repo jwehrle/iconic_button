@@ -1,3 +1,9 @@
+# Change log
+
+## 1.4.0
+
+* Added utility ButtonStyle functions back into style.dart.
+
 ## 1.3.0
 
 * Added optional overriding ButtonStyle parameter to button constructors.
@@ -6,7 +12,7 @@
 
 * Upgraded to Flutter 3.10.5 and Dart 3.0.5
 * Breaking Change: ButtonState enum which now only has selected and enabled
-* Breaking Change: ButtonController now extends SetNotifier based on a Set<ButtonState>
+* Breaking Change: ButtonController now extends SetNotifier based on a Set\<ButtonState>
 * Breaking Change: There are no more top level ButtonStyle returning Functions in style.dart. Instead, Each type of button in this package has a theme extension. Please example for usage.
 * Breaking Change: Buttons no longer accept ButtonStyle parameters. Instead, pass individual style elements that you want to change from your theme. Please see example for usage.
 
@@ -17,7 +23,7 @@
 ## 1.0.0
 
 * Updated to Flutter 3.10.4 and Dart 3.0.3.
-* Upgraded collection_value_notifier dependency 
+* Upgraded collection_value_notifier dependency
 
 ## 0.0.3
 
